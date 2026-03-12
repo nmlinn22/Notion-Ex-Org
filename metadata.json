@@ -1,0 +1,5 @@
+{
+  "name": "Notion-Ex Tracker",
+  "description": "Track smarter, Sync better with Notion-Ex. An expense tracker with AI parsing, voice input, and Notion integration.",
+  "requestFramePermissions": ["microphone"]
+}

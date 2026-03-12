@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --bg-main: #0f0f0f;
+  --bg-card: #1a1a1a;
+  --bg-input: #222222;
+  --bg-hover: #2a2a2a;
+  --border-color: #2a2a2a;
+  --text-primary: #f0f0f0;
+  --text-secondary: #aaaaaa;
+  --text-muted: #888888;
+}
+
+.light {
+  --bg-main: #f5f5f5;
+  --bg-card: #ffffff;
+  --bg-input: #f0f0f0;
+  --bg-hover: #e8e8e8;
+  --border-color: #e0e0e0;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #666666;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans', 'Noto Sans Myanmar', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Myanmar text slightly larger for readability */
+:lang(my), .mm-text {
+  font-size: 1.05em;
+  line-height: 1.8;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 2px;
+}
