@@ -24,6 +24,7 @@ import { DataTable } from './components/DataTable';
 import { Profile } from './components/Profile';
 import { BudgetSettings } from './components/Settings/BudgetSettings';
 import { useBudget } from './hooks/useBudget';
+import { NotificationBell } from './components/NotificationBell';
 import { useVoiceRecording } from './hooks/useVoiceRecording';
 import { useSettings } from './hooks/useSettings';
 import { useHistory } from './hooks/useHistory';
@@ -118,14 +119,14 @@ export default function App() {
   );
   const [showAddSheet, setShowAddSheet] = useState(false);
 
-  const { session, isAdmin, userRole, handleLogout } = useAuth(setStatus);
+  const { session, isAdmin, userRole, profileReady, handleLogout } = useAuth(setStatus);
   const { geminiKey, setGeminiKey, notionKey, setNotionKey, notionDbId, setNotionDbId, groups, setGroups, categories, setCategories, showGemini, setShowGemini, showNotion, setShowNotion, showNotionDb, setShowNotionDb, saveSettings, addGroup, addCategory, storageMode, setStorageMode } = useSettings(session, setStatus);
   const { history, fetchHistory, handleDeleteHistory, handleBulkDeleteHistory, loadMore, hasMore, isLoadingMore, totalCount, handleEditHistory } = useHistory(session, setStatus, storageMode);
   const { isRecording, isPaused, toggleVoice, pauseVoice, stopVoice } = useVoiceRecording(
     (transcript) => setInput(prev => prev + (prev ? '\n' : '') + transcript),
     setStatus,
   );
-  const { pendingUsers, userStats, handleSetAdmin, handleSetRole, handleDeleteUser } = useAdmin(session, isAdmin, setStatus);
+  const admin = useAdmin(session, isAdmin, setStatus);
   const { budgets, saveBudget, deleteBudget } = useBudget(session);
   const [dashboardRefreshKey, setDashboardRefreshKey] = React.useState(0);
 
@@ -354,6 +355,13 @@ export default function App() {
     return map;
   }, [history]);
 
+  // Profile မဆွဲရသေးခင် blank screen / flicker မဖြစ်အောင်
+  if (!profileReady) return (
+    <div className="min-h-screen bg-[var(--bg-main)] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#7c6aff]/30 border-t-[#7c6aff] rounded-full animate-spin" />
+    </div>
+  );
+
   if (!session) return <AuthForm status={status} setStatus={setStatus} />;
 
   const tabs: { id: ActiveTab; label: string; icon: React.ReactNode; color: string; activeBg: string }[] = [
@@ -401,7 +409,17 @@ export default function App() {
 
       {activeTab === 'dashboard' && storageMode === 'app' && (
         <div className="relative z-10">
-          <Dashboard session={session} storageMode={storageMode} budgets={budgets} onOpenSettings={() => setShowSettings(true)} refreshKey={dashboardRefreshKey} />
+          <div className="max-w-[95%] mx-auto px-2 sm:px-6 pt-6 flex items-center justify-between">
+            <h2 className="text-xl font-black text-[var(--text-primary)]">{t('dashboard_title')}</h2>
+            <div className="flex items-center gap-2">
+              <NotificationBell session={session} />
+              <button onClick={() => setShowSettings(true)}
+                className="w-9 h-9 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all">
+                <Settings size={18} />
+              </button>
+            </div>
+          </div>
+          <Dashboard session={session} storageMode={storageMode} budgets={budgets} refreshKey={dashboardRefreshKey} />
         </div>
       )}
 
@@ -409,9 +427,12 @@ export default function App() {
         <div className="relative z-10 max-w-[95%] mx-auto px-2 sm:px-6 pb-28 pt-8">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-xl font-black">{t('nav_budget')}</h2>
-            <motion.button onClick={() => setShowSettings(true)} className="w-10 h-10 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all shrink-0 shadow-sm">
-              <Settings size={20} />
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <NotificationBell session={session} />
+              <motion.button onClick={() => setShowSettings(true)} className="w-10 h-10 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all shrink-0 shadow-sm">
+                <Settings size={20} />
+              </motion.button>
+            </div>
           </div>
           <BudgetSettings groups={groups} budgets={budgets} onSave={saveBudget} onDelete={deleteBudget} currentExpenses={currentBudgetExpenses} session={session} />
         </div>
@@ -421,9 +442,12 @@ export default function App() {
         <div className="relative z-10 w-full px-2 sm:px-4 pb-24 pt-8 flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-black">{t('nav_transactions')}</h2>
-            <motion.button onClick={() => setShowSettings(true)} className="w-10 h-10 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all shrink-0 shadow-sm">
-              <Settings size={20} />
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <NotificationBell session={session} />
+              <motion.button onClick={() => setShowSettings(true)} className="w-10 h-10 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all shrink-0 shadow-sm">
+                <Settings size={20} />
+              </motion.button>
+            </div>
           </div>
           <DataTable entries={history} groups={groups} categories={categories} onDelete={handleDeleteHistory} onEdit={handleEditHistory} onAddGroup={addGroup} onAddCategory={addCategory} storageMode={storageMode} session={session} />
         </div>
@@ -463,10 +487,13 @@ export default function App() {
                   <p className="text-[10px] sm:text-xs font-semibold text-text-muted tracking-tight mt-0.5 leading-tight">{t('home_tagline')}</p>
                 </div>
               </motion.div>
-              <motion.button initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} onClick={() => setShowSettings(true)}
-                className="w-10 h-10 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all shrink-0 ml-2 shadow-sm">
-                <Settings size={20} />
-              </motion.button>
+              <div className="flex items-center gap-2">
+                <NotificationBell session={session} />
+                <motion.button initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} onClick={() => setShowSettings(true)}
+                  className="w-10 h-10 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all shrink-0 shadow-sm">
+                  <Settings size={20} />
+                </motion.button>
+              </div>
             </div>
           </header>
 
@@ -507,8 +534,7 @@ export default function App() {
         showSettings={showSettings} setShowSettings={setShowSettings}
         settingsView={settingsView} setSettingsView={setSettingsView}
         isAdmin={isAdmin} status={status}
-        pendingUsers={pendingUsers} userStats={userStats}
-        handleSetAdmin={handleSetAdmin} handleSetRole={handleSetRole} handleDeleteUser={handleDeleteUser}
+        admin={admin}
         geminiKey={geminiKey} setGeminiKey={setGeminiKey}
         notionKey={notionKey} setNotionKey={setNotionKey}
         notionDbId={notionDbId} setNotionDbId={setNotionDbId}

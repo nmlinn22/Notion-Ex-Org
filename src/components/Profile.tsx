@@ -10,6 +10,7 @@ import { Entry } from '../types';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
 import { useLanguage } from '../lib/LanguageContext';
+import { NotificationBell } from './NotificationBell';
 
 // ── Custom SVG Avatar Icons ───────────────────────────────────────────────
 const AVATAR_ICONS: { id: string; label: string; color: string; bg: string; svg: React.ReactNode }[] = [
@@ -257,6 +258,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
   // User role
   const [userRole, setUserRole] = useState<'member' | 'premium' | 'admin'>('member');
+  const [premiumExpiresAt, setPremiumExpiresAt] = useState<string | null>(null);
   const canUseNotion = userRole === 'premium' || userRole === 'admin';
 
   // Password modal
@@ -274,13 +276,14 @@ export const Profile: React.FC<ProfileProps> = ({
   useEffect(() => {
     supabase
       .from('profiles')
-      .select('avatar_icon, display_name, role')
+      .select('avatar_icon, display_name, role, premium_expires_at')
       .eq('id', session.user.id)
       .single()
       .then(({ data }) => {
         if (data?.avatar_icon) setAvatarIconId(data.avatar_icon);
         if (data?.display_name) setDisplayName(data.display_name);
         if (data?.role) setUserRole(data.role);
+        setPremiumExpiresAt(data?.premium_expires_at ?? null);
       });
   }, [session.user.id]);
 
@@ -418,12 +421,15 @@ export const Profile: React.FC<ProfileProps> = ({
       {/* Header */}
       <motion.div {...si(0)} className="flex items-center justify-between px-4">
         <h2 className="text-xl font-bold text-[var(--text-primary)]">{t('profile_title')}</h2>
-        <button
-          onClick={onOpenSettings}
-          className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[#a78bfa] transition-colors"
-        >
-          <Settings size={17} />
-        </button>
+        <div className="flex items-center gap-2">
+          <NotificationBell session={session} />
+          <button
+            onClick={onOpenSettings}
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[#a78bfa] transition-colors"
+          >
+            <Settings size={17} />
+          </button>
+        </div>
       </motion.div>
 
       {/* Avatar + Identity */}
@@ -481,7 +487,15 @@ export const Profile: React.FC<ProfileProps> = ({
             {userRole === 'admin' || isAdmin ? (
               <span className="text-[9px] font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/25 px-1.5 py-0.5 rounded-full">👑 {t('role_admin')}</span>
             ) : userRole === 'premium' ? (
-              <span className="text-[9px] font-semibold bg-[#7c6aff]/15 text-[#a78bfa] border border-[#7c6aff]/25 px-1.5 py-0.5 rounded-full">⭐ {t('role_premium')}</span>
+              <span className="text-[9px] font-semibold bg-[#7c6aff]/15 text-[#a78bfa] border border-[#7c6aff]/25 px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                ⭐ {t('role_premium')}
+                {premiumExpiresAt && (() => {
+                  const days = Math.ceil((new Date(premiumExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                  return days > 0
+                    ? <span className="bg-[#7c6aff]/20 px-1 rounded-full text-[8px]">{days} ရက်ကျန်</span>
+                    : <span className="bg-red-500/20 text-red-400 px-1 rounded-full text-[8px]">သက်တမ်းကုန်</span>;
+                })()}
+              </span>
             ) : (
               <span className="text-[9px] font-semibold bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)] px-1.5 py-0.5 rounded-full">{t('role_member')}</span>
             )}

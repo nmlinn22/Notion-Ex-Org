@@ -104,7 +104,8 @@ export function useHistory(
     }
   }, [storageMode, fetchAppEntries, fetchNotionHistory]);
 
-  // Load more — only for Notion mode (paginated)
+  // Load more — only for Notion mode (paginated API)
+  // App mode loads all entries at once from /api/entries, so pagination is not needed.
   const loadMore = async () => {
     if (!session || !hasMore || isLoadingMore || storageMode === 'app') return;
     setIsLoadingMore(true);

@@ -491,89 +491,233 @@ app.post("/api/admin/set-role", authenticateUser, async (req: any, res) => {
     return res.status(400).json({ error: "သင်ကိုယ်တိုင် role ပြောင်း၍ မရပါ။" });
   }
 
-  const { error } = await supabase
-    .from('profiles')
-    .update({ role, is_admin: role === 'admin' })
-    .eq('id', userId);
+  const updateData: any = { 
+    role, 
+    is_admin: role === 'admin' 
+  };
 
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true });
-});
-
-// Keep old set-admin for backward compat
-app.post("/api/admin/set-admin", authenticateUser, async (req: any, res) => {
-  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
-  const { userId, isAdmin } = req.body;
-  if (userId === req.user.id) return res.status(400).json({ error: "သင်ကိုယ်တိုင် Admin ဖြုတ်ချ၍ မရပါ။" });
-  const role = isAdmin ? 'admin' : 'member';
-  const { error } = await supabase.from('profiles').update({ is_admin: isAdmin, role }).eq('id', userId);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true });
-});
-
-// Admin: delete user account
-app.delete("/api/admin/user/:userId", authenticateUser, async (req: any, res) => {
-  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
-
-  const { userId } = req.params;
-
-  if (userId === req.user.id) {
-    return res.status(400).json({ error: "သင်ကိုယ်တိုင် Account ဖျက်၍ မရပါ။" });
+  // If setting to member, clear premium expiry
+  if (role === 'member') {
+    updateData.premium_expires_at = null;
+  } 
+  // If setting to premium, ensure they have an active expiry (default 30 days if none/expired)
+  else if (role === 'premium') {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('premium_expires_at')
+      .eq('id', userId)
+      .single();
+    
+    const now = new Date();
+    const currentExpiry = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
+    
+    if (!currentExpiry || currentExpiry < now) {
+      const defaultExpiry = new Date();
+      defaultExpiry.setDate(defaultExpiry.getDate() + 30);
+      updateData.premium_expires_at = defaultExpiry.toISOString();
+    }
   }
 
-  // history ဖျက် → profile ဖျက် → auth user ဖျက်
-  await supabase.from('history').delete().eq('user_id', userId);
-  await supabase.from('settings').delete().eq('user_id', userId);
-  await supabase.from('profiles')
-    .delete()
+  const { error } = await supabase
+    .from('profiles')
+    .update(updateData)
     .eq('id', userId);
 
-  const { error } = await supabase.auth.admin.deleteUser(userId);
   if (error) return res.status(500).json({ error: error.message });
-
   res.json({ success: true });
 });
 
-// Self: delete own account
-app.delete("/api/account/self", authenticateUser, async (req: any, res) => {
-  const userId = req.user.id;
+// Admin: update premium expiry (add days or set date)
+app.post("/api/admin/update-premium", authenticateUser, async (req: any, res) => {
+  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
+  const { userId, days, expiryDate, reset } = req.body;
+  if (!userId) return res.status(400).json({ error: "userId required" });
+
   try {
-    await supabase.from('entries').delete().eq('user_id', userId);
-    await supabase.from('history').delete().eq('user_id', userId);
-    await supabase.from('settings').delete().eq('user_id', userId);
-    await supabase.from('budgets').delete().eq('user_id', userId);
-    await supabase.from('profiles').delete().eq('id', userId);
-    const { error } = await supabase.auth.admin.deleteUser(userId);
-    if (error) return res.status(500).json({ error: error.message });
+    let updateData: any = {};
+    if (reset) {
+      updateData = { role: 'member', premium_expires_at: null };
+    } else if (expiryDate) {
+      updateData = { role: 'premium', premium_expires_at: expiryDate };
+    } else if (days !== undefined) {
+      const { data: profile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('premium_expires_at')
+        .eq('id', userId)
+        .single();
+      if (fetchError) throw fetchError;
+
+      let currentExpiry = profile.premium_expires_at ? new Date(profile.premium_expires_at) : new Date();
+      if (currentExpiry < new Date()) currentExpiry = new Date();
+      currentExpiry.setDate(currentExpiry.getDate() + parseInt(days));
+      updateData = { role: 'premium', premium_expires_at: currentExpiry.toISOString() };
+    }
+
+    const { error } = await supabase.from("profiles").update(updateData).eq("id", userId);
+    if (error) throw error;
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Admin: get usage stats per user (parse/send counts + last active)
+// Admin: toggle ban
+app.post("/api/admin/toggle-ban", authenticateUser, async (req: any, res) => {
+  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
+  const { userId, isBanned } = req.body;
+  if (!userId) return res.status(400).json({ error: "userId required" });
+  try {
+    const { error } = await supabase.from("profiles").update({ is_banned: isBanned }).eq("id", userId);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: approve payment
+app.post("/api/admin/approve-payment", authenticateUser, async (req: any, res) => {
+  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
+  const { paymentId } = req.body;
+  if (!paymentId) return res.status(400).json({ error: "paymentId required" });
+
+  try {
+    const { data: payment, error: fetchError } = await supabase.from('payment_requests').select('*').eq('id', paymentId).single();
+    if (fetchError || !payment) throw new Error("Payment request not found");
+    if (payment.status !== 'pending') throw new Error("Payment is not pending");
+
+    const planDays: Record<string, number> = {
+      days_30: 30,
+      days_90: 90,
+      days_180: 180,
+      days_365: 365,
+      // backward compat — ဟောင်း plan id တွေ
+      monthly: 30,
+      yearly: 365,
+    };
+    const days = planDays[payment.plan?.toLowerCase()] || 30;
+
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('premium_expires_at').eq('id', payment.user_id).single();
+    if (profileError) throw profileError;
+
+    let currentExpiry = profile.premium_expires_at ? new Date(profile.premium_expires_at) : new Date();
+    if (currentExpiry < new Date()) currentExpiry = new Date();
+    currentExpiry.setDate(currentExpiry.getDate() + days);
+
+    await supabase.from('profiles').update({ role: 'premium', premium_expires_at: currentExpiry.toISOString() }).eq('id', payment.user_id);
+    await supabase.from('payment_requests').update({ status: 'approved' }).eq('id', paymentId);
+
+    // Insert Notification
+    await supabase.from('notifications').insert({
+      user_id: payment.user_id,
+      title: 'Payment Approved! ⭐',
+      message: 'သင်၏ ငွေပေးချေမှုကို အတည်ပြုပြီးပါပြီ။ ယခုမှစ၍ Premium features အားလုံးကို အသုံးပြုနိုင်ပါပြီ။',
+      type: 'success'
+    });
+
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: reject payment
+app.post("/api/admin/reject-payment", authenticateUser, async (req: any, res) => {
+  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
+  const { paymentId, reason } = req.body;
+  if (!paymentId) return res.status(400).json({ error: "paymentId required" });
+  try {
+    const { data: payment } = await supabase.from('payment_requests').select('user_id').eq('id', paymentId).single();
+    const { error } = await supabase.from('payment_requests').update({ status: 'rejected', reject_reason: reason || null }).eq('id', paymentId);
+    if (error) throw error;
+
+    // Insert Notification
+    if (payment) {
+      await supabase.from('notifications').insert({
+        user_id: payment.user_id,
+        title: 'Payment Rejected ❌',
+        message: reason || 'သင်၏ ငွေပေးချေမှု လွဲမှားနေသဖြင့် ငြင်းပယ်လိုက်ပါသည်။ ကျေးဇူးပြု၍ အချက်အလက်များ ပြန်လည်စစ်ဆေးပေးပါ။',
+        type: 'error'
+      });
+    }
+
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: undo payment
+app.post("/api/admin/undo-payment", authenticateUser, async (req: any, res) => {
+  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
+  const { paymentId } = req.body;
+  if (!paymentId) return res.status(400).json({ error: "paymentId required" });
+  try {
+    const { data: payment } = await supabase.from('payment_requests').select('*').eq('id', paymentId).single();
+    if (!payment) throw new Error("Payment not found");
+
+    // If it was approved, revert role AND clear premium_expires_at
+    if (payment.status === 'approved') {
+      await supabase.from('profiles').update({ role: 'member', premium_expires_at: null }).eq('id', payment.user_id);
+    }
+
+    const { error } = await supabase.from('payment_requests').update({ status: 'pending', reject_reason: null }).eq('id', paymentId);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: delete user account
+app.delete("/api/admin/user/:userId", authenticateUser, async (req: any, res) => {
+  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
+  const { userId } = req.params;
+  if (userId === req.user.id) return res.status(400).json({ error: "သင်ကိုယ်တိုင် Account ဖျက်၍ မရပါ။" });
+
+  try {
+    await supabase.from('history').delete().eq('user_id', userId);
+    await supabase.from('settings').delete().eq('user_id', userId);
+    await supabase.from('entries').delete().eq('user_id', userId);
+    await supabase.from('budgets').delete().eq('user_id', userId);
+    await supabase.from('profiles').delete().eq('id', userId);
+    const { error } = await supabase.auth.admin.deleteUser(userId);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: reset password
+app.post("/api/admin/reset-password", authenticateUser, async (req: any, res) => {
+  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
+  const { email } = req.body;
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: get usage stats
 app.get("/api/admin/stats", authenticateUser, async (req: any, res) => {
   if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
-
-  const { data, error } = await supabase
-    .from('history')
-    .select('user_id, created_at');
-
-  if (error) return res.status(500).json({ error: error.message });
-
-  // user_id အလိုက် count နှင့် last_active တွက်
-  const statsMap: Record<string, { count: number; last_active: string }> = {};
-  for (const row of data) {
-    if (!statsMap[row.user_id]) {
-      statsMap[row.user_id] = { count: 0, last_active: row.created_at };
-    }
-    statsMap[row.user_id].count++;
-    if (row.created_at > statsMap[row.user_id].last_active) {
-      statsMap[row.user_id].last_active = row.created_at;
-    }
+  try {
+    const { data: profiles } = await supabase.from('profiles').select('role');
+    const { data: payments } = await supabase.from('payment_requests').select('status');
+    const stats = {
+      totalUsers: profiles?.length || 0,
+      premiumUsers: profiles?.filter((p: any) => p.role === 'premium').length || 0,
+      adminUsers: profiles?.filter((p: any) => p.role === 'admin').length || 0,
+      pendingPayments: payments?.filter((p: any) => p.status === 'pending').length || 0,
+    };
+    res.json(stats);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
-
-  res.json(statsMap);
 });
 
 // ─── App-only mode: entries CRUD ───────────────────────────────────────────

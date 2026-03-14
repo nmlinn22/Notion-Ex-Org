@@ -11,10 +11,14 @@ export function useAdmin(session: Session | null, isAdmin: boolean, setStatus: (
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [userStats, setUserStats] = useState<Record<string, { count: number; last_active: string }>>({});
 
-  const fetchPendingUsers = useCallback(async (currentSession: Session) => {
+  const [pendingPaymentCount, setPendingPaymentCount] = useState(0);
+
+  const fetchPendingUsers = useCallback(async (currentSession?: Session | null) => {
+    const s = currentSession || session;
+    if (!s) return;
     try {
       const res = await fetch(`${window.location.origin}/api/admin/users`, {
-        headers: { 'Authorization': `Bearer ${currentSession.access_token}` }
+        headers: { 'Authorization': `Bearer ${s.access_token}` }
       });
       if (res.ok) {
         const text = await res.text();
@@ -30,21 +34,24 @@ export function useAdmin(session: Session | null, isAdmin: boolean, setStatus: (
       console.error("Fetch pending users error:", err);
       setStatus({ type: 'error', message: translateError(err.message) });
     }
-  }, [setStatus]);
+  }, [setStatus, session]);
 
-  const fetchUserStats = useCallback(async (currentSession: Session) => {
+  const fetchUserStats = useCallback(async (currentSession?: Session | null) => {
+    const s = currentSession || session;
+    if (!s) return;
     try {
       const res = await fetch(`${window.location.origin}/api/admin/stats`, {
-        headers: { 'Authorization': `Bearer ${currentSession.access_token}` }
+        headers: { 'Authorization': `Bearer ${s.access_token}` }
       });
       if (res.ok) {
         const data = await res.json();
         setUserStats(data);
+        setPendingPaymentCount(data.pendingPayments || 0);
       }
     } catch (err: any) {
       console.error("Fetch user stats error:", err);
     }
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     if (session && isAdmin) {
@@ -52,32 +59,6 @@ export function useAdmin(session: Session | null, isAdmin: boolean, setStatus: (
       fetchUserStats(session);
     }
   }, [session, isAdmin, fetchPendingUsers, fetchUserStats]);
-
-  const handleSetAdmin = async (userId: string, makeAdmin: boolean) => {
-    if (!session) return;
-    try {
-      const res = await fetch(`${window.location.origin}/api/admin/set-admin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({ userId, isAdmin: makeAdmin })
-      });
-      if (res.ok) {
-        fetchPendingUsers(session);
-        toast.success(makeAdmin ? ts('admin_promote') : ts('admin_demote'));
-        setTimeout(() => setStatus(null), 2000);
-      } else {
-        const text = await res.text();
-        throw new Error(parseHttpError(text, res.status));
-      }
-    } catch (err: any) {
-      const msg = translateError(err.message);
-      toast.error(msg);
-      setStatus({ type: 'error', message: msg });
-    }
-  };
 
   const handleSetRole = async (userId: string, role: 'member' | 'premium' | 'admin') => {
     if (!session) return;
@@ -100,6 +81,134 @@ export function useAdmin(session: Session | null, isAdmin: boolean, setStatus: (
     }
   };
 
+  const handleUpdatePremium = async (userId: string, options: { days?: number; expiryDate?: string; reset?: boolean }) => {
+    if (!session) return;
+    try {
+      const res = await fetch(`${window.location.origin}/api/admin/update-premium`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ userId, ...options })
+      });
+      if (res.ok) {
+        fetchPendingUsers(session);
+        toast.success(ts('toast_premium_updated'));
+        return true;
+      } else {
+        const text = await res.text();
+        throw new Error(parseHttpError(text, res.status));
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+      return false;
+    }
+  };
+
+  const handleToggleBan = async (userId: string, isBanned: boolean) => {
+    if (!session) return;
+    try {
+      const res = await fetch(`${window.location.origin}/api/admin/toggle-ban`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ userId, isBanned })
+      });
+      if (res.ok) {
+        fetchPendingUsers(session);
+        toast.success(isBanned ? ts('toast_user_banned') : ts('toast_user_unbanned'));
+        return true;
+      } else {
+        const text = await res.text();
+        throw new Error(parseHttpError(text, res.status));
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+      return false;
+    }
+  };
+
+  const handleApprovePayment = async (paymentId: string) => {
+    if (!session) return;
+    try {
+      const res = await fetch(`${window.location.origin}/api/admin/approve-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ paymentId })
+      });
+      if (res.ok) {
+        toast.success(ts('toast_payment_approved'));
+        return true;
+      } else {
+        const text = await res.text();
+        throw new Error(parseHttpError(text, res.status));
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+      return false;
+    }
+  };
+
+  const handleRejectPayment = async (paymentId: string, reason: string) => {
+    if (!session) return;
+    try {
+      const res = await fetch(`${window.location.origin}/api/admin/reject-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ paymentId, reason })
+      });
+      if (res.ok) {
+        toast.success(ts('toast_payment_rejected'));
+        return true;
+      } else {
+        const text = await res.text();
+        throw new Error(parseHttpError(text, res.status));
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+      return false;
+    }
+  };
+
+  const handleUndoPayment = async (paymentId: string) => {
+    if (!session) return;
+    try {
+      const res = await fetch(`${window.location.origin}/api/admin/undo-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ paymentId })
+      });
+      if (res.ok) {
+        toast.success(ts('toast_payment_undone'));
+        return true;
+      } else {
+        const text = await res.text();
+        throw new Error(parseHttpError(text, res.status));
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+      return false;
+    }
+  };
+
+  const handleResetPassword = async (email: string) => {
+    if (!session) return;
+    try {
+      const res = await fetch(`${window.location.origin}/api/admin/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ email })
+      });
+      if (res.ok) {
+        toast.success(ts('toast_password_reset_sent'));
+        return true;
+      } else {
+        const text = await res.text();
+        throw new Error(parseHttpError(text, res.status));
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+      return false;
+    }
+  };
+
   const handleDeleteUser = async (userId: string, userEmail: string) => {
     if (!session) return;
     try {
@@ -110,24 +219,29 @@ export function useAdmin(session: Session | null, isAdmin: boolean, setStatus: (
       if (res.ok) {
         setPendingUsers(prev => prev.filter(u => u.id !== userId));
         toast.success(ts('toast_account_deleted', { email: userEmail }));
-        setTimeout(() => setStatus(null), 2000);
+        return true;
       } else {
         const text = await res.text();
         throw new Error(parseHttpError(text, res.status));
       }
     } catch (err: any) {
-      const msg = translateError(err.message);
-      toast.error(msg);
-      setStatus({ type: 'error', message: msg });
+      toast.error(err.message);
+      return false;
     }
   };
 
   return {
     pendingUsers,
     userStats,
-    handleSetAdmin,
     handleSetRole,
+    handleUpdatePremium,
+    handleToggleBan,
+    handleApprovePayment,
+    handleRejectPayment,
+    handleUndoPayment,
+    handleResetPassword,
     handleDeleteUser,
-    fetchPendingUsers
+    fetchPendingUsers,
+    pendingPaymentCount
   };
 }

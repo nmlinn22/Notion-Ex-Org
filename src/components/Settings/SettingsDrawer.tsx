@@ -22,11 +22,7 @@ interface SettingsDrawerProps {
   setSettingsView: (val: SettingsView) => void;
   isAdmin: boolean;
   status: Status | null;
-  pendingUsers: any[];
-  userStats: Record<string, { count: number; last_active: string }>;
-  handleSetAdmin: (userId: string, makeAdmin: boolean) => void;
-  handleSetRole: (userId: string, role: 'member' | 'premium' | 'admin') => void;
-  handleDeleteUser: (userId: string, userEmail: string) => void;
+  admin: any;
   geminiKey: string;
   setGeminiKey: (val: string) => void;
   notionKey: string;
@@ -75,11 +71,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   setSettingsView,
   isAdmin,
   status,
-  pendingUsers,
-  userStats,
-  handleSetAdmin,
-  handleSetRole,
-  handleDeleteUser,
+  admin,
   geminiKey, setGeminiKey,
   notionKey, setNotionKey,
   notionDbId, setNotionDbId,
@@ -110,6 +102,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
 }) => {
   const { lang, setLang, t } = useLanguage();
   const [canUseNotion, setCanUseNotion] = React.useState(false);
+
   React.useEffect(() => {
     if (!session) return;
     supabase.from('profiles').select('role').eq('id', session.user.id).single()
@@ -203,24 +196,24 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
               {settingsView === 'menu' ? (
                 <div className="space-y-1.5">
 
-                  {/* Premium Package — top of menu, free users only */}
-                  {!isPremiumUser && (
-                    <button
-                      onClick={() => setSettingsView('premium')}
-                      className="w-full p-2.5 rounded-xl bg-[#7c6aff]/5 border border-[#7c6aff]/25 flex items-center justify-between text-text-primary hover:bg-[#7c6aff]/10 transition-all group"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-lg bg-[#7c6aff]/15 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-[#7c6aff]/20">
-                          <Crown size={18} className="text-[#7c6aff]" />
-                        </div>
-                        <div>
-                          <span className="text-sm font-bold tracking-tight text-[#a78bfa]">Premium Package</span>
-                          <p className="text-[10px] text-text-muted leading-none mt-0.5">Unlock all premium features</p>
-                        </div>
+                  {/* Premium Package — all users can see, label changes by role */}
+                  <button
+                    onClick={() => setSettingsView('premium')}
+                    className="w-full p-2.5 rounded-xl bg-[#7c6aff]/5 border border-[#7c6aff]/25 flex items-center justify-between text-text-primary hover:bg-[#7c6aff]/10 transition-all group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-[#7c6aff]/15 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-[#7c6aff]/20">
+                        <Crown size={18} className="text-[#7c6aff]" />
                       </div>
-                      <ChevronRight size={16} className="text-[#7c6aff] group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  )}
+                      <div>
+                        <span className="text-sm font-bold tracking-tight text-[#a78bfa]">Premium Package</span>
+                        <p className="text-[10px] text-text-muted leading-none mt-0.5">
+                          {isPremiumUser ? t('premium_renew_desc') : t('premium_unlock_desc')}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className="text-[#7c6aff] group-hover:translate-x-1 transition-transform" />
+                  </button>
 
                   {/* Admin Panel — admin only */}
                   {isAdmin && (
@@ -378,11 +371,9 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                 <div className="space-y-4 max-w-[600px] mx-auto">
                   {settingsView === 'admin' && (
                     <AdminPanel
-                      pendingUsers={pendingUsers}
-                      userStats={userStats}
-                      handleSetRole={handleSetRole}
-                      handleDeleteUser={handleDeleteUser}
+                      admin={admin}
                       currentUserEmail={userEmail}
+                      pendingPaymentCount={admin.pendingPaymentCount}
                     />
                   )}
                   {settingsView === 'api' && (
@@ -448,7 +439,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                   )}
 
                   {settingsView === 'premium' && (
-                    <PremiumPackage userEmail={session?.user?.email} />
+                    <PremiumPackage userEmail={session?.user?.email} session={session} />
                   )}
                 </div>
               )}
