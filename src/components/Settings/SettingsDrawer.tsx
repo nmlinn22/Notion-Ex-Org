@@ -226,6 +226,19 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                           <Crown size={18} className="text-amber-500" />
                         </div>
                         <span className="text-sm font-bold tracking-tight">{t('settings_admin_panel')}</span>
+                        {/* Notification badges */}
+                        <div className="flex items-center gap-1 ml-1">
+                          {admin.pendingUsers?.length > 0 && (
+                            <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#7c6aff] text-white text-[10px] font-black flex items-center justify-center">
+                              {admin.pendingUsers.length}
+                            </span>
+                          )}
+                          {admin.pendingPaymentCount > 0 && (
+                            <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center">
+                              {admin.pendingPaymentCount}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <ChevronRight size={16} className="text-amber-500/40 group-hover:translate-x-1 transition-transform" />
                     </button>
@@ -325,7 +338,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm font-bold tracking-tight">{t('settings_auto_payments')}</span>
                         {!isPremiumUser && (
-                          <Crown size={11} className="text-amber-400" />
+                          <Crown size={13} className="text-amber-500" style={{ filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                         )}
                       </div>
                     </div>
@@ -344,7 +357,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm font-bold tracking-tight">{t('settings_backup')}</span>
                         {!isPremiumUser && (
-                          <Crown size={11} className="text-amber-400" />
+                          <Crown size={13} className="text-amber-500" style={{ filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                         )}
                       </div>
                     </div>

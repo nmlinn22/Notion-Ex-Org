@@ -554,7 +554,7 @@ export const Profile: React.FC<ProfileProps> = ({
                 <Database size={11} />
                 {t('profile_notion_sync')}
                 {!canUseNotion && (
-                  <Crown size={9} className="text-amber-500" />
+                  <Crown size={13} className="text-amber-500" style={{ filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                 )}
               </button>
             </div>

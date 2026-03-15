@@ -119,7 +119,7 @@ export const InputCard: React.FC<InputCardProps> = ({
                 {tab.icon}
                 {tab.label}
                 {isPremiumTab && (
-                  <Crown size={9} style={{ color: '#f59e0b', marginLeft: '1px', flexShrink: 0 }} />
+                  <Crown size={13} style={{ color: '#f59e0b', marginLeft: '2px', flexShrink: 0, filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                 )}
               </button>
             );
@@ -161,13 +161,13 @@ export const InputCard: React.FC<InputCardProps> = ({
                       onClick={() => onOpenPremium?.()}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-xs font-bold text-text-primary hover:border-[#7c6aff]/40 hover:bg-[#7c6aff]/5 hover:text-[#a78bfa] transition-all"
                     >
-                      <ImageIcon size={14} /><span>{t('input_gallery_btn')}</span><Crown size={9} style={{ color: '#f59e0b' }} />
+                      <ImageIcon size={14} /><span>{t('input_gallery_btn')}</span><Crown size={13} style={{ color: '#f59e0b', filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                     </button>
                     <button
                       onClick={() => onOpenPremium?.()}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-xs font-bold text-text-primary hover:border-[#34d399]/40 hover:bg-[#34d399]/5 hover:text-[#34d399] transition-all"
                     >
-                      <Camera size={14} /><span>{t('input_camera_btn')}</span><Crown size={9} style={{ color: '#f59e0b' }} />
+                      <Camera size={14} /><span>{t('input_camera_btn')}</span><Crown size={13} style={{ color: '#f59e0b', filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                     </button>
                   </div>
                 </div>
@@ -290,14 +290,14 @@ export const InputCard: React.FC<InputCardProps> = ({
                     className="w-10 h-10 rounded-[12px] border border-[#7c6aff]/30 bg-[var(--bg-input)] flex items-center justify-center text-[#a78bfa] hover:border-[#7c6aff]/50 hover:bg-[#7c6aff]/5 transition-all relative"
                   >
                     <ImageIcon size={15} />
-                    <Crown size={7} style={{ color: '#f59e0b', position: 'absolute', top: 4, right: 4 }} />
+                    <Crown size={11} style={{ color: '#f59e0b', position: 'absolute', top: 2, right: 2, filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                   </button>
                   <button
                     onClick={() => onOpenPremium?.()}
                     className="w-10 h-10 rounded-[12px] border border-[#34d399]/30 bg-[var(--bg-input)] flex items-center justify-center text-[#34d399] hover:border-[#34d399]/50 hover:bg-[#34d399]/5 transition-all relative"
                   >
                     <Camera size={15} />
-                    <Crown size={7} style={{ color: '#f59e0b', position: 'absolute', top: 4, right: 4 }} />
+                    <Crown size={11} style={{ color: '#f59e0b', position: 'absolute', top: 2, right: 2, filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                   </button>
                 </>
               )}

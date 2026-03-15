@@ -46,10 +46,7 @@ export const strings = {
     btn_send: 'Send',
     btn_load_more: 'Load More ({count} remaining)',
     btn_got_it: 'Got it',
-    approval_title: 'Account Pending Approval',
-    approval_desc: 'Your account is currently awaiting admin approval.',
-    approval_hint1: 'Please check back later.',
-    approval_hint2: 'Contact admin if this takes too long.',
+
     btn_backup_now: 'Backup Now',
     btn_restore: 'Restore',
     btn_replace: 'Replace',
@@ -707,10 +704,7 @@ export const strings = {
     btn_send: 'ပို့မည်',
     btn_load_more: 'ထပ်တင်မည် ({count} ကျန်သည်)',
     btn_got_it: 'နားလည်ပါပြီ',
-    approval_title: 'အကောင့် အတည်ပြုချက် စောင့်ဆိုင်းနေသည်',
-    approval_desc: 'သင့်အကောင့်ကို Admin မှ အတည်ပြုရန် စောင့်ဆိုင်းနေပါသည်။',
-    approval_hint1: 'ခေတ္တစောင့်ဆိုင်းပြီး နောက်မှ ပြန်လည်ကြည့်ရှုပါ။',
-    approval_hint2: 'အချိန်ကြာလျှင် Admin ထံ ဆက်သွယ်ပါ။',
+
     btn_backup_now: 'ယခု Backup လုပ်မည်',
     btn_restore: 'ပြန်လည်ထားရမည်',
     btn_replace: 'အစားထိုးမည်',

@@ -151,7 +151,7 @@ export const BackupRestore: React.FC<BackupRestoreProps> = ({
         >
           {isPremium && isSaving
             ? <><RefreshCw size={12} className="animate-spin" /> {t('saving')}</>
-            : <><Save size={12} /> {t('btn_backup_now')} {!isPremium && <Crown size={9} className="text-amber-300 ml-0.5" />}</>}
+            : <><Save size={12} /> {t('btn_backup_now')} {!isPremium && <Crown size={13} className="text-amber-500 ml-1" style={{ filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />}</>}
         </button>
       </div>
 
@@ -218,7 +218,7 @@ export const BackupRestore: React.FC<BackupRestoreProps> = ({
                   className="flex items-center gap-1 px-2.5 h-7 rounded-lg bg-[#34d399]/10 text-[#34d399] text-[10px] font-bold hover:bg-[#34d399]/20 transition-all disabled:opacity-50"
                 >
                   <RotateCcw size={11} /> {t('btn_restore')}
-                  {!isPremium && <Crown size={9} className="text-amber-300 ml-0.5" />}
+                  {!isPremium && <Crown size={13} className="text-amber-500 ml-1" style={{ filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />}
                 </button>
                 <button
                   onClick={() => isPremium ? setConfirmAction({ type: 'delete', backup }) : onOpenPremium?.()}

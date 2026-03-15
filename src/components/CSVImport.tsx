@@ -301,7 +301,7 @@ export const CSVImport: React.FC<CSVImportProps> = ({
                 <p className="text-xs font-bold text-[var(--text-primary)]">{t('csv_upload_title')}</p>
                 {!isPremium && (
                   <p className="text-[10px] mt-1 text-amber-400 font-bold flex items-center justify-center gap-1">
-                    <Crown size={9} /> Tap to upgrade and unlock
+                    <Crown size={13} style={{ color: '#f59e0b', filter: 'drop-shadow(0 0 3px #f59e0b88)' }} /> Tap to upgrade and unlock
                   </p>
                 )}
               </div>

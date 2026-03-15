@@ -172,7 +172,7 @@ export const AutoPayments: React.FC<AutoPaymentsProps> = ({
           <button onClick={isPremium ? () => { resetForm(); setShowForm(true); } : () => onOpenPremium?.()}
             className="flex items-center gap-1.5 px-3 h-8 rounded-xl bg-[#7c6aff] text-white text-[10px] font-bold hover:bg-[#a78bfa] transition-all">
             <Plus size={12} /> {t('autopay_add_btn')}
-            {!isPremium && <Crown size={9} className="text-amber-300 ml-0.5" />}
+            {!isPremium && <Crown size={13} className="text-amber-500 ml-1" style={{ filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />}
           </button>
         </div>
       </div>
