@@ -149,8 +149,11 @@ export function useHistory(
         });
         if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
       } else {
-        const { error } = await supabase.from('history').delete().eq('id', id);
-        if (error) throw error;
+        const res = await fetch(`${window.location.origin}/api/notion/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
+        if (!res.ok) throw new Error(`Notion delete failed: ${res.status}`);
       }
       setHistory(prev => prev.filter(item => item.id !== id));
       setTotalCount(prev => prev - 1);
@@ -179,8 +182,15 @@ export function useHistory(
         });
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
       } else {
-        const { error } = await supabase.from('history').delete().in('id', ids);
-        if (error) throw error;
+        const res = await fetch(`${window.location.origin}/api/notion`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ ids })
+        });
+        if (!res.ok) throw new Error(`Notion delete failed: ${res.status}`);
       }
       setHistory(prev => prev.filter(item => !ids.includes(item.id!)));
       setTotalCount(prev => prev - ids.length);

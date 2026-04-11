@@ -28,6 +28,7 @@ interface InputCardProps {
   categories: string[];
   onImportComplete: () => void;
   onOpenPremium?: () => void;
+  isOnline: boolean;
 }
 
 export const InputCard: React.FC<InputCardProps> = ({
@@ -40,6 +41,7 @@ export const InputCard: React.FC<InputCardProps> = ({
   image,
   session, userRole, isAdmin, groups, categories, onImportComplete,
   onOpenPremium,
+  isOnline
 }) => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = React.useState<'text' | 'image' | 'csv'>('text');
@@ -310,11 +312,12 @@ export const InputCard: React.FC<InputCardProps> = ({
           {/* Analyze button */}
           <button
             onClick={() => {
-              if (!isParsing && (input || image)) { parseInput(); }
+              if (!isParsing && (input || image) && isOnline) { parseInput(); }
             }}
-            disabled={isParsing || (!input && !image)}
+            disabled={isParsing || (!input && !image) || !isOnline}
             className={`h-10 px-5 rounded-[12px] bg-[#7c6aff] text-white flex items-center gap-2 transition-all hover:bg-[#8b7aff] hover:shadow-[0_6px_20px_rgba(124,106,255,0.35)] hover:-translate-y-[1px] disabled:opacity-35 disabled:translate-y-0 disabled:shadow-none`}
             style={{ boxShadow: '0 4px 14px rgba(124,106,255,0.25)' }}
+            title={!isOnline ? "အင်တာနက်ချိတ်ဆက်မှု မရှိပါ" : ""}
           >
             {isParsing
               ? <Loader2 size={14} className="animate-spin" />

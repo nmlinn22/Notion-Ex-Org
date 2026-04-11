@@ -31,6 +31,7 @@ import { useHistory } from './hooks/useHistory';
 import { useAuth } from './hooks/useAuth';
 import { useAdmin } from './hooks/useAdmin';
 import { usePullToRefresh } from './hooks/usePullToRefresh';
+import { useOfflineSync } from './hooks/useOfflineSync';
 import { translateError, parseHttpError } from './lib/errorUtils';
 import { useLanguage } from './lib/LanguageContext';
 
@@ -130,6 +131,11 @@ export default function App() {
   const { budgets, saveBudget, deleteBudget } = useBudget(session);
   const [dashboardRefreshKey, setDashboardRefreshKey] = React.useState(0);
 
+  const { isOnline, saveOffline } = useOfflineSync(session?.access_token, () => {
+    fetchHistory();
+    setDashboardRefreshKey(k => k + 1);
+  });
+
   const renameInEntries = async (field: 'group' | 'category', oldName: string, newName: string) => {
     if (!session) return;
     try {
@@ -176,6 +182,50 @@ export default function App() {
       if (data.triggered?.length > 0) toast.success(t('toast_autopay_triggered', { items: data.triggered.join(', ') }), { duration: 5000 });
     }).catch(() => {});
   }, [session?.access_token]);
+
+  // --- Notification Features ---
+  useEffect(() => {
+    if (!session || !profileReady || !history || history.length === 0) return;
+
+    const today = new Date();
+    // Use local date string YYYY-MM-DD
+    const localDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // 1. Daily Reminder (Habit)
+    const reminderKey = `daily_reminder_${localDateStr}`;
+    if (!localStorage.getItem(reminderKey)) {
+      const hasTodayEntry = history.some(h => h.date?.startsWith(localDateStr));
+      if (!hasTodayEntry) {
+        localStorage.setItem(reminderKey, 'true');
+        fetch(`${window.location.origin}/api/notifications`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({ title: 'Daily Reminder ⏰', message: 'ဒီနေ့အတွက် စာရင်းတွေ သွင်းပြီးပြီလား? မေ့မနေနဲ့နော်!', type: 'info' })
+        }).catch(() => {});
+      }
+    }
+
+    // 2. Premium Expiry Warning
+    const expiryKey = `premium_expiry_warn_${localDateStr}`;
+    if (!localStorage.getItem(expiryKey) && userRole === 'premium') {
+      import('./lib/supabase').then(({ supabase }) => {
+        supabase.from('profiles').select('premium_expires_at').eq('id', session.user.id).single()
+          .then(({ data }) => {
+            if (data?.premium_expires_at) {
+              const daysLeft = (new Date(data.premium_expires_at).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
+              if (daysLeft > 0 && daysLeft <= 3) {
+                localStorage.setItem(expiryKey, 'true');
+                fetch(`${window.location.origin}/api/notifications`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+                  body: JSON.stringify({ title: 'Premium သက်တမ်းကုန်တော့မည် ⚠️', message: `သင်၏ Premium သက်တမ်းသည် နောက် ${Math.ceil(daysLeft)} ရက်အကြာတွင် ကုန်ဆုံးပါမည်။ ဆက်လက်အသုံးပြုနိုင်ရန် သက်တမ်းတိုးပေးပါ။`, type: 'warning' })
+                }).catch(() => {});
+              }
+            }
+          });
+      });
+    }
+  }, [session, profileReady, history.length, userRole]);
 
   useEffect(() => {
     if (!window.history.state?.app) window.history.replaceState({ app: true }, '');
@@ -260,6 +310,10 @@ export default function App() {
 
   const saveManualEntry = async (entry: Partial<Entry>) => {
     if (!session) return;
+    if (!isOnline) {
+      saveOffline(`${window.location.origin}/api/entries`, { entries: [entry] });
+      return;
+    }
     try {
       const res = await fetch(`${window.location.origin}/api/entries`, {
         method: 'POST',
@@ -277,7 +331,15 @@ export default function App() {
           const freshHistory = Array.isArray(updatedHistory) ? updatedHistory : history;
           const monthTotal = freshHistory.filter(h => h.date?.startsWith(monthStr) && h.group === entry.group && h.expense).reduce((s, h) => s + (h.expense ?? 0), 0);
           if (monthTotal > budget.amount) {
-            toast.warning(t('toast_budget_exceeded', { group: entry.group, spent: monthTotal.toLocaleString(), limit: budget.amount.toLocaleString() }), { duration: 5000 });
+            const msg = t('toast_budget_exceeded', { group: entry.group, spent: monthTotal.toLocaleString(), limit: budget.amount.toLocaleString() });
+            toast.warning(msg, { duration: 5000 });
+            
+            // Push Notification
+            fetch(`${window.location.origin}/api/notifications`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+              body: JSON.stringify({ title: 'Budget Alert ⚠️', message: msg, type: 'warning' })
+            }).catch(() => {});
           }
         }
       }
@@ -286,6 +348,11 @@ export default function App() {
 
   const saveToApp = async () => {
     if (!session) return;
+    if (!isOnline) {
+      saveOffline(`${window.location.origin}/api/entries`, { entries: parsedEntries });
+      setInput(''); removeImage(); setParsedEntries([]);
+      return;
+    }
     setIsSending(true);
     setStatus({ type: 'loading', message: t('saving') });
     try {
@@ -310,6 +377,11 @@ export default function App() {
   const sendToNotion = async () => {
     if (!session) return;
     if (!notionKey || !notionDbId) { toast.error(t('toast_notion_missing')); setStatus({ type: 'error', message: t('toast_notion_missing') }); return; }
+    if (!isOnline) {
+      saveOffline(`${window.location.origin}/api/notion`, { entries: parsedEntries });
+      setInput(''); removeImage(); setParsedEntries([]);
+      return;
+    }
     setIsSending(true);
     setStatus({ type: 'loading', message: 'Sending to Notion...' });
     try {
@@ -339,6 +411,14 @@ export default function App() {
     } catch (err: any) {
       const translatedMsg = translateError(err.message);
       toast.error(translatedMsg); setStatus({ type: 'error', message: translatedMsg });
+      
+      // Push Notification
+      fetch(`${window.location.origin}/api/notifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ title: 'Notion Sync Error ❌', message: translatedMsg, type: 'error' })
+      }).catch(() => {});
+      
     } finally { setIsSending(false); }
   };
 
@@ -497,7 +577,7 @@ export default function App() {
             </div>
           </header>
 
-          <InputCard input={input} setInput={setInput} previewUrl={previewUrl} removeImage={removeImage} toggleVoice={toggleVoice} pauseVoice={pauseVoice} stopVoice={stopVoice} isRecording={isRecording} isPaused={isPaused} handleImageChange={handleImageChange} fileInputRef={fileInputRef} parseInput={parseInput} isParsing={isParsing} image={image} session={session!} userRole={userRole} isAdmin={isAdmin} groups={groups} categories={categories} onImportComplete={fetchHistory} onOpenPremium={() => { setShowSettings(true); setSettingsView('premium'); }} />
+          <InputCard input={input} setInput={setInput} previewUrl={previewUrl} removeImage={removeImage} toggleVoice={toggleVoice} pauseVoice={pauseVoice} stopVoice={stopVoice} isRecording={isRecording} isPaused={isPaused} handleImageChange={handleImageChange} fileInputRef={fileInputRef} parseInput={parseInput} isParsing={isParsing} image={image} session={session!} userRole={userRole} isAdmin={isAdmin} groups={groups} categories={categories} onImportComplete={fetchHistory} onOpenPremium={() => { setShowSettings(true); setSettingsView('premium'); }} isOnline={isOnline} />
 
           <ParsedEntries entries={parsedEntries} isSending={isSending} sendToNotion={storageMode === 'notion' ? sendToNotion : saveToApp} storageMode={storageMode} onEdit={updateParsedEntry} onRemove={removeParsedEntry} groups={groups} categories={categories} onAddGroup={addGroup} onAddCategory={addCategory} />
 

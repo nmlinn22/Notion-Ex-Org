@@ -387,6 +387,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                       admin={admin}
                       currentUserEmail={userEmail}
                       pendingPaymentCount={admin.pendingPaymentCount}
+                      session={session}
                     />
                   )}
                   {settingsView === 'api' && (

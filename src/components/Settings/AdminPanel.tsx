@@ -6,12 +6,13 @@ import { AdminPaymentManage } from './AdminPaymentManage';
 import { AdminUserManage, AdminUser } from './AdminUserManage';
 
 type UserRole = 'member' | 'premium' | 'admin';
-type AdminTab = 'users' | 'payments';
+type AdminTab = 'users' | 'payments' | 'broadcast';
 
 interface AdminPanelProps {
   admin: any;
   currentUserEmail: string;
   pendingPaymentCount?: number;
+  session?: typeof import('@supabase/supabase-js').Session | null;
 }
 
 const ROLE_STYLE: Record<UserRole, { color: string; bg: string; icon: React.ReactNode }> = {
@@ -24,6 +25,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   admin,
   currentUserEmail,
   pendingPaymentCount = 0,
+  session,
 }) => {
   const { pendingUsers, userStats } = admin;
   const { t } = useLanguage();
@@ -45,6 +47,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     if (!q) return pendingUsers;
     return pendingUsers.filter((u: AdminUser) => u.email.toLowerCase().includes(q));
   }, [pendingUsers, userSearch]);
+
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+
+  const handleBroadcast = async () => {
+    if (!broadcastMessage.trim() || !session) return;
+    setIsBroadcasting(true);
+    try {
+      const res = await fetch(`${window.location.origin}/api/admin/broadcast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ message: broadcastMessage, type: 'info' })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      triggerToast(`Successfully sent to ${data.count} users!`);
+      setBroadcastMessage('');
+    } catch (err: any) {
+      triggerToast(`Failed: ${err.message}`);
+    } finally {
+      setIsBroadcasting(false);
+    }
+  };
 
   return (
     <>
@@ -89,6 +114,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               {pendingPaymentCount}
             </span>
           )}
+        </button>
+        <button
+          onClick={() => setActiveTab('broadcast')}
+          className={`flex-1 py-2 rounded-lg text-[12px] font-semibold transition-all ${
+            activeTab === 'broadcast'
+              ? 'bg-[var(--bg-card)] text-[#a78bfa] shadow'
+              : 'text-text-muted hover:text-text-primary'
+          }`}
+        >
+          Broadcast
         </button>
       </div>
 
@@ -184,6 +219,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {/* ══ PAYMENTS TAB ══ */}
       {activeTab === 'payments' && (
         <AdminPaymentManage onToast={triggerToast} admin={admin} />
+      )}
+
+      {/* ══ BROADCAST TAB ══ */}
+      {activeTab === 'broadcast' && (
+        <div className="space-y-3 bg-[var(--bg-input)] p-4 rounded-xl border border-[var(--border-color)]">
+          <div>
+            <h3 className="text-sm font-bold text-text-primary">System Broadcast</h3>
+            <p className="text-[10px] text-text-muted mt-1">Send a notification to ALL users instantly.</p>
+          </div>
+          <textarea
+            value={broadcastMessage}
+            onChange={(e) => setBroadcastMessage(e.target.value)}
+            placeholder="Type your message here..."
+            className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-3 text-sm min-h-[100px] outline-none focus:border-[#7c6aff]/50 transition-all resize-none"
+          />
+          <button
+            onClick={handleBroadcast}
+            disabled={isBroadcasting || !broadcastMessage.trim()}
+            className="w-full h-10 bg-[#7c6aff] text-white rounded-xl font-bold text-xs hover:bg-[#8b7aff] transition-all disabled:opacity-50"
+          >
+            {isBroadcasting ? 'Sending...' : 'Send Broadcast'}
+          </button>
+        </div>
       )}
 
       {/* ══ MANAGE USER MODAL ══ */}
