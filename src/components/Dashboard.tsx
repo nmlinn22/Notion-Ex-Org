@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Session } from '@supabase/supabase-js';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { ChevronRight, ChevronDown, Wallet, Settings } from 'lucide-react';
+import { ChevronRight, ChevronDown, Wallet, Settings, ArrowUp, ArrowDown, LayoutGrid } from 'lucide-react';
 import { CATEGORY_ICONS } from '../constants';
 import { Budget } from '../hooks/useBudget';
 import { useLanguage } from '../lib/LanguageContext';
@@ -31,6 +31,10 @@ function fmt(n: number) {
   return n.toLocaleString();
 }
 
+function fullFmt(n: number) {
+  return n.toLocaleString();
+}
+
 function Dropdown<T extends string | number | null>({
   value, options, labelFn, onChange, align = 'left',
 }: {
@@ -42,10 +46,10 @@ function Dropdown<T extends string | number | null>({
     <div className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-sm font-bold text-[var(--text-primary)] hover:border-[#7c6aff]/50 transition-all"
+        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-xs font-semibold text-[var(--text-primary)] hover:border-[#7c6aff]/50 transition-all"
       >
         {labelFn(value)}
-        <ChevronDown size={13} className={`text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={11} className={`text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       <AnimatePresence>
         {open && (
@@ -56,13 +60,13 @@ function Dropdown<T extends string | number | null>({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.96 }}
               transition={{ duration: 0.15 }}
-              className={`absolute top-full mt-1 z-50 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-xl overflow-hidden min-w-[140px] ${align === 'right' ? 'right-0' : 'left-0'}`}
+              className={`absolute top-full mt-1 z-50 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-xl overflow-hidden min-w-[100px] ${align === 'right' ? 'right-0' : 'left-0'}`}
             >
               {options.map(opt => (
                 <button
                   key={String(opt)}
                   onClick={() => { onChange(opt); setOpen(false); }}
-                  className={`w-full px-4 py-2 text-left text-sm font-semibold transition-colors whitespace-nowrap ${
+                  className={`w-full px-3 py-1.5 text-left text-xs font-medium transition-colors whitespace-nowrap ${
                     opt === value ? 'bg-[#7c6aff]/15 text-[#a78bfa]' : 'text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
                   }`}
                 >
@@ -152,7 +156,44 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
   const totalIncome = data?.totalIncome ?? 0;
   const totalExpense = data?.totalExpense ?? 0;
   const balance = totalIncome - totalExpense;
-  const groupEntries = (Object.entries(data?.byGroup ?? {}) as [string, GroupData][]).sort((a, b) => b[1].expense - a[1].expense);
+  const [customSortOrder, setCustomSortOrder] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('dashboard_group_order') || '[]');
+    } catch { return []; }
+  });
+  const [isSorting, setIsSorting] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('dashboard_group_order', JSON.stringify(customSortOrder));
+  }, [customSortOrder]);
+
+  const moveGroup = (idx: number, direction: 'up' | 'down') => {
+    const entries = [...groupEntries.map(([g]) => g)];
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= entries.length) return;
+    
+    // Swap
+    const temp = entries[idx];
+    entries[idx] = entries[targetIdx];
+    entries[targetIdx] = temp;
+    
+    setCustomSortOrder(entries);
+  };
+
+  const groupEntries = useMemo(() => {
+    const entries = (Object.entries(data?.byGroup ?? {}) as [string, GroupData][]);
+    if (customSortOrder.length > 0) {
+      return [...entries].sort((a, b) => {
+        const idxA = customSortOrder.indexOf(a[0]);
+        const idxB = customSortOrder.indexOf(b[0]);
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+        return Math.max(b[1].expense, b[1].income) - Math.max(a[1].expense, a[1].income);
+      });
+    }
+    return entries.sort((a, b) => Math.max(b[1].expense, b[1].income) - Math.max(a[1].expense, a[1].income));
+  }, [data, customSortOrder]);
 
   const allCategories = useMemo(() => {
     const map: Record<string, { expense: number; income: number; group: string }> = {};
@@ -217,12 +258,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
 
   const Overview = () => (
     <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4">
-      <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-3">{t('dashboard_overview')}</p>
+      <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-3">{t('dashboard_overview')}</p>
       <div className="flex items-center gap-4">
-        <div className="w-[120px] h-[120px] shrink-0">
+        <div className="w-[110px] h-[110px] shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={donutData} cx="50%" cy="50%" innerRadius={34} outerRadius={52} dataKey="value" strokeWidth={0}>
+              <Pie data={donutData} cx="50%" cy="50%" innerRadius={30} outerRadius={48} dataKey="value" strokeWidth={0}>
                 {donutData.map((_, i) => <Cell key={i} fill={donutColors[i % donutColors.length]} />)}
               </Pie>
               <Tooltip formatter={(v: any) => (v as number).toLocaleString()}
@@ -230,34 +271,34 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {isNoData ? (
             <p className="text-text-muted text-xs italic">{t('no_data')}</p>
           ) : (
-            <div className="space-y-1.5 max-h-[110px] overflow-y-auto pr-1">
+            <div className="space-y-1.5 max-h-[100px] overflow-y-auto pr-1">
               {donutData.map((d, i) => (
                 <div key={d.name} className="flex items-center justify-between gap-2 min-w-0">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                    <span className="text-[10px] text-text-muted font-medium truncate">{d.name}</span>
+                    <span className="text-[11px] text-text-muted font-medium truncate">{d.name}</span>
                   </div>
-                  <span className="text-[10px] font-black shrink-0" style={{ color: COLORS[i % COLORS.length] }}>{fmt(d.value)}</span>
+                  <span className="text-[11px] font-bold shrink-0" style={{ color: COLORS[i % COLORS.length] }}>{fmt(d.value)}</span>
                 </div>
               ))}
             </div>
           )}
-          <div className="pt-2 mt-2 border-t border-[var(--border-color)] flex gap-4">
+          <div className="pt-2 mt-2 border-t border-[var(--border-color)] flex gap-3">
             <div>
-              <p className="text-[9px] text-text-muted font-bold uppercase tracking-wide">{t('dashboard_income')}</p>
-              <p className="text-sm font-black text-[#34d399]">{fmt(totalIncome)}</p>
+              <p className="text-[10px] text-text-muted font-semibold uppercase tracking-wide mb-0.5">{t('dashboard_income')}</p>
+              <p className="text-[13px] font-black text-[#34d399]">{fmt(totalIncome)}</p>
             </div>
             <div>
-              <p className="text-[9px] text-text-muted font-bold uppercase tracking-wide">{t('dashboard_expense')}</p>
-              <p className="text-sm font-black text-[#f87171]">{fmt(totalExpense)}</p>
+              <p className="text-[10px] text-text-muted font-semibold uppercase tracking-wide mb-0.5">{t('dashboard_expense')}</p>
+              <p className="text-[13px] font-black text-[#f87171]">{fmt(totalExpense)}</p>
             </div>
             <div>
-              <p className="text-[9px] text-text-muted font-bold uppercase tracking-wide">{t('dashboard_balance')}</p>
-              <p className={`text-sm font-black ${balance >= 0 ? 'text-[#a78bfa]' : 'text-[#f87171]'}`}>{balance >= 0 ? '+' : ''}{fmt(balance)}</p>
+              <p className="text-[10px] text-text-muted font-semibold uppercase tracking-wide mb-0.5">{t('dashboard_balance')}</p>
+              <p className={`text-[13px] font-black ${balance >= 0 ? 'text-[#a78bfa]' : 'text-[#f87171]'}`}>{balance >= 0 ? '+' : ''}{fmt(balance)}</p>
             </div>
           </div>
         </div>
@@ -266,18 +307,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
   );
 
   return (
-    <div className="relative z-10 max-w-[95%] mx-auto px-2 sm:px-6 pb-28 pt-6 flex flex-col gap-3">
+    <div className="relative z-10 w-full max-w-full mx-auto px-3 sm:px-6 pb-28 pt-6 flex flex-col gap-3 overflow-x-hidden">
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-black text-[var(--text-primary)]">{t('dashboard_title')}</h2>
-        {onOpenSettings && (
-          <button onClick={onOpenSettings}
-            className="w-9 h-9 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all">
-            <Settings size={18} />
-          </button>
-        )}
-      </div>
+      {/* Header — Removed redundant title, App.tsx handles it */}
 
       {/* Year / Month dropdowns — Month hidden on Monthly Trend tab */}
       <div className="flex items-center justify-between">
@@ -300,7 +332,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
       <div className="flex gap-2">
         {(['group', 'trend'] as const).map(tab => (
           <button key={tab} onClick={() => setMainTab(tab)}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border ${
+            className={`flex-1 py-2 px-1 rounded-xl text-xs font-bold transition-all border min-h-[40px] whitespace-normal leading-tight text-center ${
               mainTab === tab
                 ? 'bg-[#7c6aff] text-white border-[#7c6aff] shadow-md shadow-[#7c6aff]/25'
                 : 'bg-[var(--bg-card)] text-text-muted border-[var(--border-color)] hover:text-[var(--text-primary)] hover:border-[#7c6aff]/40'
@@ -331,63 +363,86 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
                     <Overview />
                     {groupEntries.length > 0 && (
                       <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4">
-                        <div className="flex items-center justify-between mb-3 gap-2">
-                          <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider shrink-0">
-                            {t('dashboard_by_group')} <span className="text-[9px] normal-case font-normal">— {t('dashboard_tap_to_view')}</span>
+                        <div className="flex flex-wrap items-center justify-between mb-3 gap-y-2 gap-x-2">
+                          <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider min-w-0 flex-1" style={{ wordBreak: 'break-word' }}>
+                            {t('dashboard_by_group')}
                           </p>
-                          <Dropdown
-                            value={groupGroupFilter}
-                            options={['__all__', ...groupEntries.map(([g]) => g)]}
-                            labelFn={v => v === '__all__' ? t('filter_all') : v}
-                            onChange={v => setGroupGroupFilter(v)}
-                            align="right"
-                          />
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button onClick={() => setIsSorting(!isSorting)}
+                              className={`text-[9px] font-bold px-2 py-1 rounded-lg border transition-all whitespace-nowrap ${isSorting ? 'bg-[#7c6aff] text-white border-[#7c6aff]' : 'bg-[var(--bg-card)] text-text-muted border-[var(--border-color)]'}`}>
+                              {isSorting ? 'Done' : 'Rearrange'}
+                            </button>
+                            <Dropdown
+                              value={groupGroupFilter}
+                              options={['__all__', ...groupEntries.map(([g]) => g)]}
+                              labelFn={v => v === '__all__' ? t('filter_all') : v}
+                              onChange={v => setGroupGroupFilter(v)}
+                              align="right"
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          {(groupGroupFilter === '__all__' ? groupEntries : groupEntries.filter(([g]) => g === groupGroupFilter)).map(([g, gd]: [string, GroupData], i) => {
-                            const pct = totalExpense > 0 ? Math.round((gd.expense / totalExpense) * 100) : 0;
-                            const budget = budgets.find(b => b.group_name === g);
-                            const budgetPct = budget ? Math.min(Math.round((gd.expense / budget.amount) * 100), 100) : null;
-                            const over = budget ? gd.expense > budget.amount : false;
-                            const remaining = budget ? budget.amount - gd.expense : null;
-                            const budgetBarColor = over ? '#f87171' : budgetPct && budgetPct > 75 ? '#fbbf24' : '#34d399';
-                            return (
-                              <button key={g} onClick={() => { setSelectedGroup(g); setLevel('group'); }}
-                                className="w-full text-left p-3 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] border border-transparent hover:border-[var(--border-color)] transition-all group">
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm font-bold text-[var(--text-primary)]">{g}</span>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-xs font-black" style={{ color: COLORS[i % COLORS.length] }}>{fmt(gd.expense)}</span>
-                                    <span className="text-[10px] text-text-muted bg-[var(--bg-card)] px-1.5 py-0.5 rounded-full">{pct}%</span>
-                                    <ChevronRight size={13} className="text-text-muted group-hover:translate-x-0.5 transition-transform" />
-                                  </div>
-                                </div>
-                                <div className="h-1.5 bg-[var(--bg-card)] rounded-full overflow-hidden">
-                                  <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5, delay: i * 0.05 }}
-                                    className="h-full rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                                </div>
-                                {budget && (
-                                  <div className="mt-2 pt-2 border-t border-[var(--border-color)]">
-                                    <div className="h-1.5 bg-[var(--bg-card)] rounded-full overflow-hidden mb-1.5">
-                                      <motion.div initial={{ width: 0 }} animate={{ width: `${budgetPct}%` }} transition={{ duration: 0.5, delay: i * 0.05 + 0.1 }}
-                                        className="h-full rounded-full" style={{ backgroundColor: budgetBarColor }} />
+                          <div className="space-y-2">
+                            {(groupGroupFilter === '__all__' ? groupEntries : groupEntries.filter(([g]) => g === groupGroupFilter)).map(([g, gd]: [string, GroupData], i) => {
+                              const isIncomeGroup = g.toLowerCase() === 'income';
+                              const displayVal = isIncomeGroup ? gd.income : gd.expense;
+                              const totalValForPct = isIncomeGroup ? totalIncome : totalExpense;
+                              const pct = totalValForPct > 0 ? Math.round((displayVal / totalValForPct) * 100) : 0;
+                              
+                              const budget = budgets.find(b => b.group_name === g);
+                              const budgetPct = budget && budget.amount > 0 ? Math.min(Math.round((gd.expense / budget.amount) * 100), 100) : (budget && budget.amount === 0 && gd.expense > 0 ? 100 : 0);
+                              const over = budget ? gd.expense > budget.amount : false;
+                              const remaining = budget ? budget.amount - gd.expense : null;
+                              const budgetBarColor = over ? '#f87171' : (budgetPct && budgetPct > 75) ? '#fbbf24' : '#34d399';
+                              return (
+                                <div key={g} className="relative group">
+                                  <button onClick={() => { if (!isSorting) { setSelectedGroup(g); setLevel('group'); } }}
+                                    className={`w-full text-left p-3 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] border transition-all flex flex-col ${isSorting ? 'border-[#7c6aff]/40 cursor-default' : 'border-transparent hover:border-[var(--border-color)]'}`}>
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        {isSorting && (
+                                          <div className="flex flex-col gap-0.5 mr-1">
+                                            <button onClick={(e) => { e.stopPropagation(); moveGroup(i, 'up'); }} className="p-0.5 hover:text-[#7c6aff]"><ArrowUp size={12} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); moveGroup(i, 'down'); }} className="p-0.5 hover:text-[#7c6aff]"><ArrowDown size={12} /></button>
+                                          </div>
+                                        )}
+                                        <span className="text-[13px] font-bold text-[var(--text-primary)]">{g}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={`text-[13px] font-black ${isIncomeGroup ? 'text-[#34d399]' : ''}`} 
+                                              style={!isIncomeGroup ? { color: COLORS[i % COLORS.length] } : undefined}>
+                                          {fullFmt(displayVal)}
+                                        </span>
+                                        <span className="text-[10px] text-text-muted bg-[var(--bg-card)] px-1.5 py-0.5 rounded-full">{pct}%</span>
+                                        {!isSorting && <ChevronRight size={13} className="text-text-muted group-hover:translate-x-0.5 transition-transform" />}
+                                      </div>
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                      {over
-                                        ? <span className="text-[9px] font-black text-[#f87171]">⚠ {t('dashboard_over_by')} {fmt(gd.expense - budget.amount)}</span>
-                                        : <span className="text-[9px] text-text-muted">{budgetPct}% {t('dashboard_of_budget')}</span>}
-                                      <span className="text-[9px] text-text-muted">
-                                        {fmt(gd.expense)} / {fmt(budget.amount)}
-                                        {!over && remaining !== null && <span className="font-bold ml-1" style={{ color: budgetBarColor }}> ({fmt(remaining)} {t('dashboard_left')})</span>}
-                                      </span>
+                                    <div className="h-1.5 bg-[var(--bg-card)] rounded-full overflow-hidden">
+                                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5, delay: i * 0.05 }}
+                                        className="h-full rounded-full" style={{ backgroundColor: isIncomeGroup ? '#34d399' : COLORS[i % COLORS.length] }} />
                                     </div>
-                                  </div>
-                                )}
-                                {!budget && <p className="text-[9px] text-text-muted mt-1.5">{t('dashboard_no_budget_set')}</p>}
-                              </button>
-                            );
-                          })}
-                        </div>
+                                    {budget && (
+                                      <div className="mt-2 pt-2 border-t border-[var(--border-color)]">
+                                        <div className="h-1.5 bg-[var(--bg-card)] rounded-full overflow-hidden mb-1.5">
+                                          <motion.div initial={{ width: 0 }} animate={{ width: `${budgetPct}%` }} transition={{ duration: 0.5, delay: i * 0.05 + 0.1 }}
+                                            className="h-full rounded-full" style={{ backgroundColor: budgetBarColor }} />
+                                        </div>
+                                        <div className="flex flex-wrap items-center justify-between gap-y-0.5">
+                                          {over
+                                            ? <span className="text-[10px] font-bold text-[#f87171]">⚠ {t('dashboard_over_by')} {fullFmt(gd.expense - budget.amount)}</span>
+                                            : <span className="text-[10px] text-text-muted">{budgetPct}% {t('dashboard_of_budget')}</span>}
+                                          <span className="text-[10px] text-text-muted break-all">
+                                            {fullFmt(gd.expense)} / {fullFmt(budget.amount)}
+                                            {!over && remaining !== null && <span className="font-bold ml-1" style={{ color: budgetBarColor }}>({fullFmt(remaining)} {t('dashboard_left')})</span>}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    )}
+                                    {!budget && !isIncomeGroup && <p className="text-[10px] text-text-muted mt-1.5">{t('dashboard_no_budget_set')}</p>}
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
                       </div>
                     )}
                   </div>
@@ -404,35 +459,50 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
                     <div className="space-y-3">
                       {/* Group summary bar */}
                       <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4">
-                        <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2">{selectedGroup}</p>
-                        <div className="flex gap-4">
-                          <div><p className="text-[10px] text-text-muted mb-0.5">{t('dashboard_expense')}</p><p className="text-xl font-black text-[#f87171]">{fmt(gd.expense)}</p></div>
-                          {gd.income > 0 && <div><p className="text-[10px] text-text-muted mb-0.5">{t('dashboard_income')}</p><p className="text-xl font-black text-[#34d399]">{fmt(gd.income)}</p></div>}
-                          <div><p className="text-[10px] text-text-muted mb-0.5">{t('dashboard_entries')}</p><p className="text-xl font-black text-[var(--text-primary)]">{allEntries.length}</p></div>
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex flex-col min-w-0">
+                            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1 truncate">{selectedGroup}</p>
+                            <span className="text-[9px] px-2 py-0.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted w-fit">
+                              {t('dashboard_summary')}
+                            </span>
+                          </div>
+                          <div className="flex gap-5 text-right shrink-0">
+                            <div>
+                              <p className="text-[9px] text-text-muted uppercase leading-none mb-1.5">{t('dashboard_expense')}</p>
+                              <p className="text-sm font-black text-[#f87171] leading-none">{fullFmt(gd.expense)}</p>
+                            </div>
+                            {gd.income > 0 && <div>
+                              <p className="text-[9px] text-text-muted uppercase leading-none mb-1.5">{t('dashboard_income')}</p>
+                              <p className="text-sm font-black text-[#34d399] leading-none">{fullFmt(gd.income)}</p>
+                            </div>}
+                            <div>
+                              <p className="text-[9px] text-text-muted uppercase leading-none mb-1.5">{t('dashboard_entries')}</p>
+                              <p className="text-sm font-black text-[var(--text-primary)] leading-none">{allEntries.length}</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       {/* Flat entries list — Date, Item, Amount, Category */}
                       <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl overflow-hidden">
-                        <div className="px-4 py-3 border-b border-[var(--border-color)] bg-[var(--bg-input)] grid grid-cols-[1fr_auto_auto] gap-2">
+                        <div className="px-4 py-3 border-b border-[var(--border-color)] bg-[var(--bg-input)] grid grid-cols-[1fr_auto] gap-2">
                           <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider">{t('col_item_date')}</span>
                           <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider text-right">{t('col_amount')}</span>
-                          <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider text-right">{t('filter_category')}</span>
                         </div>
                         <div className="divide-y divide-[var(--border-color)]">
                           {allEntries.length === 0
                             ? <p className="text-center text-text-muted text-xs py-8 italic">{t('no_entries_found')}</p>
                             : allEntries.map((e: any) => (
-                              <div key={e.id} className="grid grid-cols-[1fr_auto_auto] gap-2 px-4 py-3 items-center">
-                                <div className="min-w-0">
-                                  <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{e.item}</p>
-                                  <p className="text-[10px] text-text-muted">{e.date}</p>
+                              <div key={e.id} className="grid grid-cols-[1fr_auto] gap-2 px-4 py-3 items-center">
+                                <div className="min-w-0 pr-2">
+                                  <p className="text-sm font-bold text-[var(--text-primary)] leading-snug whitespace-normal break-words">{e.item}</p>
+                                  <p className="text-[10px] text-[#a78bfa] font-medium mt-1">{e.date}</p>
                                 </div>
-                                <div className="text-right">
-                                  {e.expense > 0 && <p className="text-sm font-bold text-[#f87171]">-{fmt(e.expense)}</p>}
-                                  {e.income > 0 && <p className="text-sm font-bold text-[#34d399]">+{fmt(e.income)}</p>}
-                                </div>
-                                <div className="text-right">
-                                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted whitespace-nowrap">
+                                <div className="text-right flex flex-col items-end gap-1">
+                                  <div className="leading-tight">
+                                    {e.expense > 0 && <p className="text-sm font-bold text-[#f87171]">-{fullFmt(e.expense)}</p>}
+                                    {e.income > 0 && <p className="text-sm font-bold text-[#34d399]">+{fullFmt(e.income)}</p>}
+                                  </div>
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted whitespace-nowrap">
                                     {CATEGORY_ICONS[e.category] ?? '📦'} {e.category}
                                   </span>
                                 </div>
@@ -456,8 +526,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
                           {CATEGORY_ICONS[selectedCategory] ?? '📦'} {selectedCategory}
                         </p>
                         <div className="flex gap-4">
-                          {cd && cd.expense > 0 && <div><p className="text-[10px] text-text-muted mb-0.5">{t('dashboard_expense')}</p><p className="text-xl font-black text-[#f87171]">{fmt(cd.expense)}</p></div>}
-                          {cd && cd.income > 0 && <div><p className="text-[10px] text-text-muted mb-0.5">{t('dashboard_income')}</p><p className="text-xl font-black text-[#34d399]">{fmt(cd.income)}</p></div>}
+                          {cd && cd.expense > 0 && <div><p className="text-[10px] text-text-muted mb-0.5">{t('dashboard_expense')}</p><p className="text-lg font-bold text-[#f87171]">{fullFmt(cd.expense)}</p></div>}
+                          {cd && cd.income > 0 && <div><p className="text-[10px] text-text-muted mb-0.5">{t('dashboard_income')}</p><p className="text-lg font-bold text-[#34d399]">{fullFmt(cd.income)}</p></div>}
                         </div>
                       </div>
                       <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl overflow-hidden">
@@ -474,8 +544,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
                                   <p className="text-[10px] text-text-muted mt-0.5">{e.date}</p>
                                 </div>
                                 <div className="text-right">
-                                  {e.expense > 0 && <p className="text-sm font-bold text-[#f87171]">-{fmt(e.expense)}</p>}
-                                  {e.income > 0 && <p className="text-sm font-bold text-[#34d399]">+{fmt(e.income)}</p>}
+                                  {e.expense > 0 && <p className="text-sm font-bold text-[#f87171]">-{fullFmt(e.expense)}</p>}
+                                  {e.income > 0 && <p className="text-sm font-bold text-[#34d399]">+{fullFmt(e.income)}</p>}
                                 </div>
                               </div>
                             ))
@@ -520,19 +590,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3">
                       <p className="text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1">{t('dashboard_year_income')}</p>
-                      <p className="text-lg font-black text-[#34d399]">{fmt(yearIncome)}</p>
+                      <p className="text-lg font-bold text-[#34d399]">{fullFmt(yearIncome)}</p>
                     </div>
                     <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3">
                       <p className="text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1">{t('dashboard_year_expense')}</p>
-                      <p className="text-lg font-black text-[#f87171]">{fmt(yearExpense)}</p>
+                      <p className="text-lg font-bold text-[#f87171]">{fullFmt(yearExpense)}</p>
                     </div>
                     <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3">
                       <p className="text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1">{t('dashboard_balance')}</p>
-                      <p className={`text-lg font-black ${yearBalance >= 0 ? 'text-[#a78bfa]' : 'text-[#f87171]'}`}>{yearBalance >= 0 ? '+' : ''}{fmt(yearBalance)}</p>
+                      <p className={`text-lg font-bold ${yearBalance >= 0 ? 'text-[#a78bfa]' : 'text-[#f87171]'}`}>{yearBalance >= 0 ? '+' : ''}{fullFmt(yearBalance)}</p>
                     </div>
                     <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3">
                       <p className="text-[9px] font-bold text-text-muted uppercase tracking-wider mb-1">{t('dashboard_saving_rate')}</p>
-                      <p className={`text-lg font-black ${savingRate >= 20 ? 'text-[#34d399]' : savingRate >= 0 ? 'text-[#fbbf24]' : 'text-[#f87171]'}`}>{savingRate}%</p>
+                      <p className={`text-lg font-bold ${savingRate >= 20 ? 'text-[#34d399]' : savingRate >= 0 ? 'text-[#fbbf24]' : 'text-[#f87171]'}`}>{savingRate}%</p>
                     </div>
                   </div>
 
@@ -577,7 +647,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between mb-1">
                                     <span className="text-xs font-semibold text-[var(--text-primary)] truncate">{cat}</span>
-                                    <span className="text-xs font-black ml-2 shrink-0" style={{ color: COLORS[i % COLORS.length] }}>{fmt(val)}</span>
+                                    <span className="text-xs font-black ml-2 shrink-0" style={{ color: COLORS[i % COLORS.length] }}>{fullFmt(val)}</span>
                                   </div>
                                   <div className="h-1.5 bg-[var(--bg-input)] rounded-full overflow-hidden">
                                     <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5, delay: i * 0.05 }}

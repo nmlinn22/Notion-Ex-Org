@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
@@ -79,35 +78,7 @@ const supabase = (supabaseUrl && supabaseServiceKey)
 const app = express();
 const PORT = 3000;
 
-// Security: Allow specific domains
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://notion-ex-org.vercel.app"
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
-
-// Security: Rate Limiting
-const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 1 minute)
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  message: { error: "Requests များလွန်းနေပါသည်။ ခေတ္တစောင့်ပြီးမှ ပြန်လည်ကြိုးစားပေးပါ။" }
-});
-
-// Apply rate limiter to all api routes
-app.use('/api', limiter);
-
+app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
 // Middleware to verify Supabase User and Approval Status
@@ -126,14 +97,19 @@ const authenticateUser = async (req: any, res: any, next: any) => {
       return res.status(401).json({ error: "Token missing from authorization header" });
     }
 
-    // Use Supabase Auth to securely verify the JWT token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: "Invalid or expired token" });
+    // Decode JWT manually to get user id (service role client cannot use getUser with user JWT)
+    let userId: string;
+    try {
+      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('utf8'));
+      userId = payload.sub;
+      if (!userId) throw new Error('No sub in token');
+      // Basic expiry check
+      if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+        return res.status(401).json({ error: "Token expired" });
+      }
+    } catch {
+      return res.status(401).json({ error: "Invalid token" });
     }
-
-    const userId = user.id;
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -434,11 +410,7 @@ app.post("/api/notion", authenticateUser, async (req: any, res) => {
           group_name: entry.group
         });
 
-      if (dbError) {
-        console.error("Supabase History Save Error (Notion entry succeeded):", dbError);
-        // We do NOT throw here. The entry was successfully saved to Notion.
-        // Failing here would cause the user to retry, resulting in duplicates in Notion.
-      }
+      if (dbError) throw dbError;
 
       results.push({ success: true, id: data.id });
     } catch (err: any) {
@@ -449,149 +421,6 @@ app.post("/api/notion", authenticateUser, async (req: any, res) => {
     res.json({ results });
   } catch (err: any) {
     console.error("Notion Route Error:", err);
-    res.status(500).json({ error: translateServerError(err.message) });
-  }
-});
-
-// Delete Multiple from Notion and History (Notion Mode)
-app.delete("/api/notion", authenticateUser, async (req: any, res) => {
-  const user = req.user;
-  const { ids } = req.body;
-  if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ error: 'ids array required' });
-
-  try {
-    const { data: settings } = await supabase.from('settings').select('notion_key, notion_db_id').eq('user_id', user.id).single();
-    const apiKey = settings?.notion_key || process.env.NOTION_API_KEY;
-    const dbId = settings?.notion_db_id || process.env.NOTION_DATABASE_ID;
-
-    if (!apiKey || !dbId) return res.status(400).json({ error: "Notion credentials missing" });
-
-    // Get the history entries
-    const { data: historyEntries, error: historyFetchError } = await supabase
-      .from('history').select('*').in('id', ids).eq('user_id', user.id);
-
-    if (historyFetchError || !historyEntries || historyEntries.length === 0) {
-      return res.status(404).json({ error: "History entries not found" });
-    }
-
-    // Try to archive them in Notion one by one
-    for (const historyEntry of historyEntries) {
-      const queryPayload = { filter: { and: [
-        { property: "Item", title: { equals: historyEntry.item || "" } },
-        { property: "Date", date: { equals: historyEntry.date } }
-      ] } };
-
-      const queryRes = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "Notion-Version": "2022-06-28" },
-        body: JSON.stringify(queryPayload)
-      });
-
-      if (queryRes.ok) {
-        const queryData = await queryRes.json() as any;
-        if (queryData.results && queryData.results.length > 0) {
-          const pageId = queryData.results[0].id;
-          await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
-            method: "PATCH",
-            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "Notion-Version": "2022-06-28" },
-            body: JSON.stringify({ archived: true })
-          });
-        }
-      }
-    }
-
-    // Clean up local Supabase history
-    const { error: deleteError } = await supabase.from('history').delete().in('id', ids).eq('user_id', user.id);
-    if (deleteError) throw deleteError;
-
-    res.json({ success: true, deleted: ids.length });
-  } catch (err: any) {
-    console.error("Notion Bulk Delete Route Error:", err);
-    res.status(500).json({ error: translateServerError(err.message) });
-  }
-});
-
-// Delete from Notion and History (Notion Mode)
-app.delete("/api/notion/:historyId", authenticateUser, async (req: any, res) => {
-  const { historyId } = req.params;
-  const user = req.user;
-
-  try {
-    const { data: settings } = await supabase
-      .from('settings')
-      .select('notion_key, notion_db_id')
-      .eq('user_id', user.id)
-      .single();
-
-    const apiKey = settings?.notion_key || process.env.NOTION_API_KEY;
-    const dbId = settings?.notion_db_id || process.env.NOTION_DATABASE_ID;
-
-    if (!apiKey || !dbId) {
-      return res.status(400).json({ error: "Notion credentials missing" });
-    }
-
-    // Get the history entry first
-    const { data: historyEntry, error: historyFetchError } = await supabase
-      .from('history')
-      .select('*')
-      .eq('id', historyId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (historyFetchError || !historyEntry) {
-      return res.status(404).json({ error: "History entry not found" });
-    }
-
-    // Try to find the exact Notion page to archive it
-    // Search Notion DB by Date and Item
-    const queryPayload = {
-      filter: {
-        and: [
-          { property: "Item", title: { equals: historyEntry.item || "" } },
-          { property: "Date", date: { equals: historyEntry.date } }
-        ]
-      }
-    };
-
-    const queryRes = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "Notion-Version": "2022-06-28"
-      },
-      body: JSON.stringify(queryPayload)
-    });
-
-    if (queryRes.ok) {
-      const queryData = await queryRes.json() as any;
-      if (queryData.results && queryData.results.length > 0) {
-        const pageId = queryData.results[0].id;
-        // Archive the page in Notion
-        await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
-          method: "PATCH",
-          headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-            "Notion-Version": "2022-06-28"
-          },
-          body: JSON.stringify({ archived: true })
-        });
-      }
-    }
-
-    // Clean up local Supabase history
-    const { error: deleteError } = await supabase
-      .from('history')
-      .delete()
-      .eq('id', historyId)
-      .eq('user_id', user.id);
-
-    if (deleteError) throw deleteError;
-
-    res.json({ success: true });
-  } catch (err: any) {
-    console.error("Notion Delete Route Error:", err);
     res.status(500).json({ error: translateServerError(err.message) });
   }
 });
@@ -729,51 +558,6 @@ app.post("/api/admin/update-premium", authenticateUser, async (req: any, res) =>
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
-  }
-});
-
-// Insert general notifications
-app.post("/api/notifications", authenticateUser, async (req: any, res) => {
-  const { title, message, type } = req.body;
-  const user = req.user;
-  try {
-    const { error } = await supabase.from('notifications').insert({
-      user_id: user.id,
-      title: title || 'Notification',
-      message: message || '',
-      type: type || 'info'
-    });
-    if (error) throw error;
-    res.json({ success: true });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Admin: System Broadcast
-app.post("/api/admin/broadcast", authenticateUser, async (req: any, res) => {
-  if (!req.isAdmin) return res.status(403).json({ error: "Admin only" });
-  const { title, message, type } = req.body;
-  if (!message) return res.status(400).json({ error: "message required" });
-
-  try {
-    const { data: users, error: userError } = await supabase.from('profiles').select('id');
-    if (userError) throw userError;
-
-    const notifications = users.map((u: any) => ({
-      user_id: u.id,
-      title: title || 'System Broadcast',
-      message,
-      type: type || 'info'
-    }));
-
-    // Chunk insertion if too large, but Supabase handles up to a decent amount
-    const { error } = await supabase.from('notifications').insert(notifications);
-    if (error) throw error;
-
-    res.json({ success: true, count: notifications.length });
-  } catch (err: any) {
-    res.status(500).json({ error: translateServerError(err.message) });
   }
 });
 
@@ -961,8 +745,6 @@ app.get("/api/entries", authenticateUser, async (req: any, res) => {
       query = query.gte("date", `${y}-${m}-01`).lte("date", `${y}-${m}-${lastDay}`);
     }
 
-    query = query.limit(50000); // FIX: prevent 1000 rows truncation limit
-
     const { data, error } = await query;
     if (error) throw error;
     res.json({ data });
@@ -1011,8 +793,7 @@ app.get("/api/entries/summary", authenticateUser, async (req: any, res) => {
       .select("date, income, expense, group, category")
       .eq("user_id", userId)
       .gte("date", `${y}-01-01`)
-      .lte("date", `${y}-12-31`)
-      .limit(50000); // FIX: prevent 1000 rows truncation limit
+      .lte("date", `${y}-12-31`);
 
     if (error) throw error;
 
@@ -1057,14 +838,14 @@ app.get("/api/entries/drilldown/groups", authenticateUser, async (req: any, res)
     let query = supabase.from("entries").select("income, expense, group, category, item, date, id")
       .eq("user_id", userId);
     if (year && month) {
-      const y = year as string, m = (month as string).padStart(2, '0');
-      query = query.gte("date", `${y}-${m}-01`).lte("date", `${y}-${m}-31`);
+      const y = Number(year), m = Number(month);
+      const startDate = `${y}-${String(m).padStart(2, '0')}-01`;
+      const nextMonth = new Date(y, m, 1); // m is 1-based, index m is next month
+      const endDate = nextMonth.toISOString().split('T')[0];
+      query = query.gte("date", startDate).lt("date", endDate);
     } else if (year) {
       query = query.gte("date", `${year}-01-01`).lte("date", `${year}-12-31`);
     }
-
-    query = query.limit(50000); // FIX: prevent 1000 rows truncation limit
-
     const { data, error } = await query;
     if (error) throw error;
     const byGroup: Record<string, { income: number; expense: number; categories: Record<string, { income: number; expense: number; entries: any[] }> }> = {};

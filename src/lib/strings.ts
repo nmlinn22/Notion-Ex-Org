@@ -187,6 +187,7 @@ export const strings = {
     col_item_date: 'Item / Date',
     col_amount: 'Amount',
     col_category: 'Category',
+    col_category_group: 'Category / Group',
     table_header_entries: 'Entries',
     filter_year: 'Year',
     filter_month: 'Month',
@@ -250,6 +251,7 @@ export const strings = {
     budget_over_by: 'Over by',
     budget_no_limit: 'No limit',
     budget_allocation_balance: 'Unallocated',
+    budget_limit_help: 'You can customize your groups in Settings',
     api_keys_title: 'API Keys',
     api_app_desc: 'App Only mode — Gemini key required.',
     autopay_empty: 'No auto payments yet.',
@@ -291,7 +293,7 @@ export const strings = {
     toast_run_failed: 'Failed to run payments.',
     required: 'Required',
 
-  
+
     profile_mode_dark: 'Dark',
     profile_mode_light: 'Light',
     auth_no_account: "Don't have an account? Sign Up",
@@ -844,6 +846,7 @@ export const strings = {
     col_item_date: 'ပစ္စည်း / ရက်စွဲ',
     col_amount: 'ပမာဏ',
     col_category: 'အမျိုးအစား',
+    col_category_group: 'အမျိုးအစား / အုပ်စု',
     table_header_entries: 'မှတ်တမ်း',
     filter_year: 'နှစ်',
     filter_month: 'လ',
@@ -909,6 +912,7 @@ export const strings = {
     budget_over_by: 'လွန်ကဲနေသည်',
     budget_no_limit: 'သတ်မှတ်ချက် မရှိ',
     budget_allocation_balance: 'မခွဲဝေရသေးသော',
+    budget_limit_help: 'Group များကို Setting ထဲတွင် စိတ်ကြိုက်ပြင်ဆင်နိုင်ပါသည်',
     api_keys_title: 'API သော့များ',
     api_app_desc: 'App Only မုဒ် — Gemini သော့ လိုအပ်သည်။',
     autopay_empty: 'အလိုအလျောက် ငွေပေးချေမှု မရှိသေးပါ။',

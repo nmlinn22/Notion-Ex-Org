@@ -19,7 +19,7 @@ interface DataTableProps {
   session?: Session | null;
 }
 
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function fmt(n: number | null | undefined) {
   if (!n) return '—';
@@ -91,7 +91,7 @@ async function exportPDF(rows: Entry[], filename: string, totalIncome: number, t
       };
       img.src = imgUrl;
     });
-  } catch (_) {}
+  } catch (_) { }
 
   const drawWatermark = () => {
     if (!watermarkB64) return;
@@ -111,7 +111,7 @@ async function exportPDF(rows: Entry[], filename: string, totalIncome: number, t
       reader.onload = () => res((reader.result as string).split(',')[1]);
       reader.readAsDataURL(blob2);
     });
-  } catch (_) {}
+  } catch (_) { }
 
   const drawCornerLogo = () => {
     if (!logoB64) return;
@@ -238,7 +238,7 @@ export const DataTable: React.FC<DataTableProps> = ({ entries, groups, categorie
                 <motion.div initial={{ opacity: 0, scale: 0.9, y: -4 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}
                   className="absolute right-0 top-full mt-1 z-50 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-xl overflow-hidden min-w-[140px]">
                   <div className="px-3 py-2 border-b border-[var(--border-color)]">
-                    <p className="text-[10px] font-black text-text-muted uppercase tracking-wide">{t('export_rows', {count: filtered.length})}</p>
+                    <p className="text-[10px] font-black text-text-muted uppercase tracking-wide">{t('export_rows', { count: filtered.length })}</p>
                   </div>
                   {[
                     { label: 'Excel (.xlsx)', icon: '📊', action: () => { exportXLSX(filtered, exportFilename()); setShowExport(false); } },
@@ -318,25 +318,25 @@ export const DataTable: React.FC<DataTableProps> = ({ entries, groups, categorie
         </div>
         <div className="bg-[var(--bg-card)] border border-[#34d399]/20 rounded-xl px-2 py-2 text-center">
           <p className="text-[8px] text-text-muted font-bold uppercase">{t('dashboard_income')}</p>
-          <p className="text-sm font-black text-[#34d399]">{totalIncome >= 1000000 ? (totalIncome/1000000).toFixed(1)+'M' : totalIncome >= 1000 ? (totalIncome/1000).toFixed(0)+'K' : totalIncome.toLocaleString()}</p>
+          <p className="text-sm font-black text-[#34d399]">{totalIncome >= 1000000 ? (totalIncome / 1000000).toFixed(1) + 'M' : totalIncome >= 1000 ? (totalIncome / 1000).toFixed(0) + 'K' : totalIncome.toLocaleString()}</p>
         </div>
         <div className="bg-[var(--bg-card)] border border-[#f87171]/20 rounded-xl px-2 py-2 text-center">
           <p className="text-[8px] text-text-muted font-bold uppercase">{t('dashboard_expense')}</p>
-          <p className="text-sm font-black text-[#f87171]">{totalExpense >= 1000000 ? (totalExpense/1000000).toFixed(1)+'M' : totalExpense >= 1000 ? (totalExpense/1000).toFixed(0)+'K' : totalExpense.toLocaleString()}</p>
+          <p className="text-sm font-black text-[#f87171]">{totalExpense >= 1000000 ? (totalExpense / 1000000).toFixed(1) + 'M' : totalExpense >= 1000 ? (totalExpense / 1000).toFixed(0) + 'K' : totalExpense.toLocaleString()}</p>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden flex flex-col flex-1">
         {/* Header */}
-        <div className="grid grid-cols-[1.8fr_1fr_1fr_1fr] bg-[var(--bg-input)] border-b border-[var(--border-color)] px-3 py-2">
-          {[t('col_item_date'), t('col_amount'), t('filter_group'), t('filter_category')].map(h => (
+        <div className="grid grid-cols-[1.8fr_1fr_1.2fr] bg-[var(--bg-input)] border-b border-[var(--border-color)] px-3 py-2">
+          {[t('col_item_date'), t('col_amount'), t('col_category_group')].map(h => (
             <span key={h} className="text-[8px] font-black uppercase tracking-wider text-text-muted">{h}</span>
           ))}
         </div>
 
         {/* Rows */}
-        <div className="divide-y divide-[var(--border-color)] max-h-[55vh] overflow-y-auto">
+        <div className="divide-y divide-[var(--border-color)] overflow-y-auto">
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-text-muted">
               <p className="text-2xl mb-1">🗂️</p>
@@ -347,25 +347,26 @@ export const DataTable: React.FC<DataTableProps> = ({ entries, groups, categorie
             const amount = isIncome ? entry.income : entry.expense;
             return (
               <div key={entry.id} onClick={() => storageMode === 'app' && setEditingEntry({ ...entry })}
-                className={`grid grid-cols-[1.8fr_1fr_1fr_1fr] px-3 py-2.5 hover:bg-[var(--bg-input)]/40 transition-all items-center ${storageMode === 'app' ? 'cursor-pointer' : 'cursor-default'}`}>
+                className={`grid grid-cols-[1.8fr_1fr_1.2fr] px-3 py-2.5 hover:bg-[var(--bg-input)]/40 transition-all items-center ${storageMode === 'app' ? 'cursor-pointer' : 'cursor-default'}`}>
                 {/* Item + Date */}
                 <div className="min-w-0 pr-1">
                   <div className="flex items-center gap-1">
                     <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isIncome ? 'bg-[#34d399]' : 'bg-[#f87171]'}`} />
                     <p className="text-xs font-semibold truncate">{entry.item}</p>
                   </div>
-                  <p className="text-[9px] text-text-muted mt-0.5 pl-2.5">{entry.date?.slice(5)}</p>
+                  <p className="text-[9px] text-[#a78bfa]/70 mt-0.5 pl-2.5">{entry.date?.slice(5)}</p>
                 </div>
                 {/* Amount */}
                 <p className={`text-xs font-black font-mono ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
-                  {isIncome ? '+' : '−'}{amount && amount >= 1000 ? (amount/1000).toFixed(0)+'K' : fmt(amount)}
+                  {isIncome ? '+' : '−'}{fmt(amount)}
                 </p>
-                {/* Group */}
-                <p className="text-[9px] text-text-muted truncate pr-1">{entry.group ?? '—'}</p>
-                {/* Category */}
-                <p className="text-[9px] text-text-muted truncate">
-                  {entry.category ? `${CATEGORY_ICONS[entry.category] ?? ''}  ${entry.category}` : '—'}
-                </p>
+                {/* Category / Group */}
+                <div className="flex flex-col gap-0.5 pr-1">
+                  <p className="text-[9px] text-text-muted truncate">
+                    {entry.category ? `${CATEGORY_ICONS[entry.category] ?? ''}  ${entry.category}` : '—'}
+                  </p>
+                  <p className="text-[9px] text-[#a78bfa] font-semibold truncate">{entry.group ?? '—'}</p>
+                </div>
               </div>
             );
           })}

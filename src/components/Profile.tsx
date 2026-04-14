@@ -420,7 +420,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
       {/* Header */}
       <motion.div {...si(0)} className="flex items-center justify-between px-4">
-        <h2 className="text-xl font-bold text-[var(--text-primary)]">{t('profile_title')}</h2>
+        <h2 className="text-lg font-black text-[var(--text-primary)]">{t('profile_title')}</h2>
         <div className="flex items-center gap-2">
           <NotificationBell session={session} />
           <button
@@ -536,21 +536,19 @@ export const Profile: React.FC<ProfileProps> = ({
             <div className="grid grid-cols-2 gap-1.5">
               {/* App Only — always available */}
               <button onClick={() => setStorageMode('app')}
-                className={`py-2 rounded-xl text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                  storageMode === 'app' ? 'bg-[#7c6aff] text-white shadow-md shadow-[#7c6aff]/20' : 'bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)]'
-                }`}>
+                className={`py-2 rounded-xl text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 ${storageMode === 'app' ? 'bg-[#7c6aff] text-white shadow-md shadow-[#7c6aff]/20' : 'bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)]'
+                  }`}>
                 <Smartphone size={11} />{t('profile_app_only')}
               </button>
               {/* Notion Sync — Premium/Admin only */}
               <button
                 onClick={() => !canUseNotion ? onOpenPremium?.() : setStorageMode('notion')}
-                className={`py-2 rounded-xl text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 relative overflow-hidden ${
-                  !canUseNotion
+                className={`py-2 rounded-xl text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 relative overflow-hidden ${!canUseNotion
                     ? 'bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-amber-500/30'
                     : storageMode === 'notion'
                       ? 'bg-[#7c6aff] text-white shadow-md shadow-[#7c6aff]/20'
                       : 'bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)]'
-                }`}>
+                  }`}>
                 <Database size={11} />
                 {t('profile_notion_sync')}
                 {!canUseNotion && (
@@ -558,7 +556,7 @@ export const Profile: React.FC<ProfileProps> = ({
                 )}
               </button>
             </div>
-            </div>
+          </div>
         </GroupBox>
       </motion.div>
 
@@ -693,9 +691,8 @@ export const Profile: React.FC<ProfileProps> = ({
                     <input type={showConfirmPw ? 'text' : 'password'} value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)} placeholder={t('auth_confirm_password_placeholder')}
                       onKeyDown={e => e.key === 'Enter' && handleChangePassword()}
-                      className={`w-full bg-[var(--bg-input)] border rounded-xl px-3.5 py-2.5 text-sm outline-none text-[var(--text-primary)] pr-9 transition-colors ${
-                        confirmPassword && confirmPassword !== newPassword ? 'border-red-500/50' : 'border-[var(--border-color)] focus:border-[#7c6aff]/60'
-                      }`} />
+                      className={`w-full bg-[var(--bg-input)] border rounded-xl px-3.5 py-2.5 text-sm outline-none text-[var(--text-primary)] pr-9 transition-colors ${confirmPassword && confirmPassword !== newPassword ? 'border-red-500/50' : 'border-[var(--border-color)] focus:border-[#7c6aff]/60'
+                        }`} />
                     <button type="button" onClick={() => setShowConfirmPw(v => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">
                       {showConfirmPw ? <EyeOff size={14} /> : <Eye size={14} />}

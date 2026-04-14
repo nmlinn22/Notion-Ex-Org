@@ -180,7 +180,7 @@ export default function App() {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` }
     }).then(r => r.json()).then(data => {
       if (data.triggered?.length > 0) toast.success(t('toast_autopay_triggered', { items: data.triggered.join(', ') }), { duration: 5000 });
-    }).catch(() => {});
+    }).catch(() => { });
   }, [session?.access_token]);
 
   // --- Notification Features ---
@@ -201,7 +201,7 @@ export default function App() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
           body: JSON.stringify({ title: 'Daily Reminder ⏰', message: 'ဒီနေ့အတွက် စာရင်းတွေ သွင်းပြီးပြီလား? မေ့မနေနဲ့နော်!', type: 'info' })
-        }).catch(() => {});
+        }).catch(() => { });
       }
     }
 
@@ -219,7 +219,7 @@ export default function App() {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
                   body: JSON.stringify({ title: 'Premium သက်တမ်းကုန်တော့မည် ⚠️', message: `သင်၏ Premium သက်တမ်းသည် နောက် ${Math.ceil(daysLeft)} ရက်အကြာတွင် ကုန်ဆုံးပါမည်။ ဆက်လက်အသုံးပြုနိုင်ရန် သက်တမ်းတိုးပေးပါ။`, type: 'warning' })
-                }).catch(() => {});
+                }).catch(() => { });
               }
             }
           });
@@ -333,13 +333,13 @@ export default function App() {
           if (monthTotal > budget.amount) {
             const msg = t('toast_budget_exceeded', { group: entry.group, spent: monthTotal.toLocaleString(), limit: budget.amount.toLocaleString() });
             toast.warning(msg, { duration: 5000 });
-            
+
             // Push Notification
             fetch(`${window.location.origin}/api/notifications`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
               body: JSON.stringify({ title: 'Budget Alert ⚠️', message: msg, type: 'warning' })
-            }).catch(() => {});
+            }).catch(() => { });
           }
         }
       }
@@ -411,14 +411,14 @@ export default function App() {
     } catch (err: any) {
       const translatedMsg = translateError(err.message);
       toast.error(translatedMsg); setStatus({ type: 'error', message: translatedMsg });
-      
+
       // Push Notification
       fetch(`${window.location.origin}/api/notifications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ title: 'Notion Sync Error ❌', message: translatedMsg, type: 'error' })
-      }).catch(() => {});
-      
+      }).catch(() => { });
+
     } finally { setIsSending(false); }
   };
 
@@ -445,11 +445,11 @@ export default function App() {
   if (!session) return <AuthForm status={status} setStatus={setStatus} />;
 
   const tabs: { id: ActiveTab; label: string; icon: React.ReactNode; color: string; activeBg: string }[] = [
-    { id: 'home',        label: t('nav_home'),         icon: <Home size={17} />,     color: '#a78bfa', activeBg: 'bg-[#7c6aff]/15' },
-    { id: 'dashboard',   label: t('nav_dashboard'),    icon: <BarChart2 size={17} />, color: '#f59e0b', activeBg: 'bg-[#f59e0b]/15' },
-    { id: 'budget',      label: t('nav_budget'),       icon: <Target size={17} />,   color: '#34d399', activeBg: 'bg-[#34d399]/15' },
-    { id: 'data',        label: t('nav_transactions'), icon: <FolderOpen size={17} />,color: '#60a5fa', activeBg: 'bg-[#60a5fa]/15' },
-    { id: 'profile',     label: t('nav_profile'),      icon: <User size={17} />,     color: '#f472b6', activeBg: 'bg-[#f472b6]/15' },
+    { id: 'home', label: t('nav_home'), icon: <Home size={17} />, color: '#a78bfa', activeBg: 'bg-[#7c6aff]/15' },
+    { id: 'dashboard', label: t('nav_dashboard'), icon: <BarChart2 size={17} />, color: '#f59e0b', activeBg: 'bg-[#f59e0b]/15' },
+    { id: 'budget', label: t('nav_budget'), icon: <Target size={17} />, color: '#34d399', activeBg: 'bg-[#34d399]/15' },
+    { id: 'data', label: t('nav_transactions'), icon: <FolderOpen size={17} />, color: '#60a5fa', activeBg: 'bg-[#60a5fa]/15' },
+    { id: 'profile', label: t('nav_profile'), icon: <User size={17} />, color: '#f472b6', activeBg: 'bg-[#f472b6]/15' },
   ];
 
   return (
@@ -489,8 +489,8 @@ export default function App() {
 
       {activeTab === 'dashboard' && storageMode === 'app' && (
         <div className="relative z-10">
-          <div className="max-w-[95%] mx-auto px-2 sm:px-6 pt-6 flex items-center justify-between">
-            <h2 className="text-xl font-black text-[var(--text-primary)]">{t('dashboard_title')}</h2>
+          <div className="w-full px-3 sm:px-6 pt-3 pb-1 flex items-center justify-between">
+            <h2 className="text-lg font-black text-[var(--text-primary)]">{t('dashboard_title')}</h2>
             <div className="flex items-center gap-2">
               <NotificationBell session={session} />
               <button onClick={() => setShowSettings(true)}
@@ -504,9 +504,9 @@ export default function App() {
       )}
 
       {activeTab === 'budget' && storageMode === 'app' && (
-        <div className="relative z-10 max-w-[95%] mx-auto px-2 sm:px-6 pb-28 pt-8">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-black">{t('nav_budget')}</h2>
+        <div className="relative z-10 max-w-[95%] mx-auto px-2 sm:px-6 pb-28 pt-3">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-black">{t('nav_budget')}</h2>
             <div className="flex items-center gap-2">
               <NotificationBell session={session} />
               <motion.button onClick={() => setShowSettings(true)} className="w-10 h-10 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all shrink-0 shadow-sm">
@@ -519,9 +519,9 @@ export default function App() {
       )}
 
       {activeTab === 'data' && storageMode === 'app' && (
-        <div className="relative z-10 w-full px-2 sm:px-4 pb-24 pt-8 flex flex-col">
+        <div className="relative z-10 w-full px-2 sm:px-4 pb-24 pt-3 flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-black">{t('nav_transactions')}</h2>
+            <h2 className="text-lg font-black">{t('nav_transactions')}</h2>
             <div className="flex items-center gap-2">
               <NotificationBell session={session} />
               <motion.button onClick={() => setShowSettings(true)} className="w-10 h-10 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex items-center justify-center text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/50 transition-all shrink-0 shadow-sm">
@@ -537,7 +537,7 @@ export default function App() {
         <div className="relative z-10 flex flex-col items-center justify-center min-h-[60vh] px-8 gap-5">
           <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           </div>
           <div className="text-center">
