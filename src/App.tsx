@@ -93,7 +93,7 @@ const BumpNavbar: React.FC<{
               >
                 {tab.icon}
               </motion.div>
-              <span className="text-[9px] font-bold transition-colors" style={{ color: isActive ? tab.color : 'var(--text-muted)' }}>
+              <span className="text-tiny font-bold transition-colors" style={{ color: isActive ? tab.color : 'var(--text-muted)' }}>
                 {tab.label}
               </span>
             </button>
@@ -469,7 +469,7 @@ export default function App() {
             <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" strokeLinecap="round" />
             <path d="M21 3v5h-5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="text-[11px] font-bold text-[#a78bfa]">
+          <span className="text-caption font-bold text-[#a78bfa]">
             {isRefreshing ? t('refreshing') : progress >= 1 ? t('release_to_refresh') : t('pull_to_refresh')}
           </span>
         </div>
@@ -541,8 +541,8 @@ export default function App() {
             </svg>
           </div>
           <div className="text-center">
-            <p className="text-[15px] font-semibold text-[var(--text-primary)] mb-1.5">{t('feature_unavailable_title')}</p>
-            <p className="text-[13px] text-[var(--text-muted)] leading-relaxed max-w-[260px]">
+            <p className="text-title font-semibold text-[var(--text-primary)] mb-1.5">{t('feature_unavailable_title')}</p>
+            <p className="text-sub text-[var(--text-muted)] leading-relaxed max-w-[260px]">
               {t('feature_unavailable_desc')}
             </p>
           </div>
@@ -564,7 +564,7 @@ export default function App() {
                 </div>
                 <div className="min-w-0">
                   <h1 className="text-xl sm:text-2xl font-black tracking-tight bg-gradient-to-r from-[#7c6aff] to-[#34d399] bg-clip-text text-transparent truncate">{t('auth_app_name')}</h1>
-                  <p className="text-[10px] sm:text-xs font-semibold text-text-muted tracking-tight mt-0.5 leading-tight">{t('home_tagline')}</p>
+                  <p className="text-tiny sm:text-sub font-semibold text-text-muted tracking-tight mt-0.5 leading-tight">{t('home_tagline')}</p>
                 </div>
               </motion.div>
               <div className="flex items-center gap-2">
@@ -584,8 +584,8 @@ export default function App() {
           {history.length > 0 && (
             <div className="mt-8">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-semibold tracking-tight text-text-muted">{t('home_recent_activity')}</span>
-                <button onClick={() => navigateTab('data')} className="text-[10px] font-bold text-[#a78bfa] hover:underline">{t('home_see_all')}</button>
+                <span className="text-caption font-semibold tracking-tight text-text-muted">{t('home_recent_activity')}</span>
+                <button onClick={() => navigateTab('data')} className="text-tiny font-bold text-[#a78bfa] hover:underline">{t('home_see_all')}</button>
               </div>
               <div className="space-y-1.5">
                 {history.slice(0, 3).map((entry) => {
@@ -595,10 +595,10 @@ export default function App() {
                     <div key={entry.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-3.5 flex items-center gap-3 shadow-sm">
                       <div className={`w-2 h-2 rounded-full shrink-0 ${isIncome ? 'bg-[#34d399]' : 'bg-[#f87171]'}`} />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-bold truncate">{entry.item}</div>
-                        <div className="text-[11px] text-text-muted mt-0.5">{entry.date} · {entry.category}</div>
+                        <div className="text-body font-bold truncate">{entry.item}</div>
+                        <div className="text-caption text-text-muted mt-0.5">{entry.date} · {entry.category}</div>
                       </div>
-                      <div className={`font-mono text-xs font-black shrink-0 ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
+                      <div className={`font-mono text-sub font-black shrink-0 ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
                         {isIncome ? '+' : '-'}{amount?.toLocaleString()}
                       </div>
                     </div>
@@ -653,7 +653,7 @@ export default function App() {
                 <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500"><AlertCircle size={32} /></div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold text-text-primary">{t('api_credentials_required')}</h3>
-                  <p className="text-sm text-text-muted leading-relaxed">{t('api_credentials_desc')}</p>
+                  <p className="text-body text-text-muted leading-relaxed">{t('api_credentials_desc')}</p>
                 </div>
                 <div className="w-full pt-2 space-y-3">
                   <button onClick={() => { setShowCredentialsModal(false); setShowSettings(true); setSettingsView('api'); }}

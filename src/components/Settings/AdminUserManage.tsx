@@ -147,7 +147,7 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
             className="absolute top-4 left-1/2 -translate-x-1/2 z-[700] bg-emerald-500 text-white px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-2 whitespace-nowrap"
           >
             <CheckCircle size={14} />
-            <span className="text-[12px] font-semibold">{successMsg}</span>
+            <span className="text-sub font-semibold">{successMsg}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -155,8 +155,8 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
       {/* Header */}
       <div className="px-5 py-4 border-b border-[var(--border-color)] bg-[var(--bg-input)]/50 flex items-center justify-between">
         <div className="min-w-0">
-          <h2 className="text-sm font-black text-text-primary">{t('admin_manage_title')}</h2>
-          <p className="text-text-muted text-[11px] font-semibold mt-0.5 truncate max-w-[220px]">{user.email}</p>
+          <h2 className="text-body font-black text-text-primary">{t('admin_manage_title')}</h2>
+          <p className="text-text-muted text-caption font-semibold mt-0.5 truncate max-w-[220px]">{user.email}</p>
         </div>
         <button onClick={onClose}
           className="p-2 hover:bg-[var(--bg-input)] rounded-xl text-text-muted border border-[var(--border-color)] transition-all">
@@ -167,13 +167,12 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
       {/* Sub tabs */}
       <div className="flex bg-[var(--bg-input)] border-b border-[var(--border-color)]">
         {([
-          { id: 'general',  icon: SettingsIcon, label: t('admin_tab_general') },
-          { id: 'security', icon: ShieldAlert,   label: t('admin_tab_security') },
+          { id: 'general', icon: SettingsIcon, label: t('admin_tab_general') },
+          { id: 'security', icon: ShieldAlert, label: t('admin_tab_security') },
         ] as const).map(tab => (
           <button key={tab.id} onClick={() => setSubTab(tab.id)}
-            className={`flex-1 py-3 flex flex-col items-center gap-1 text-[11px] font-semibold transition-all ${
-              subTab === tab.id ? 'bg-[var(--bg-card)] text-[#a78bfa]' : 'text-text-muted hover:text-text-primary'
-            }`}
+            className={`flex-1 py-3 flex flex-col items-center gap-1 text-caption font-semibold transition-all ${subTab === tab.id ? 'bg-[var(--bg-card)] text-[#a78bfa]' : 'text-text-muted hover:text-text-primary'
+              }`}
           >
             <tab.icon size={12} /><span>{tab.label}</span>
           </button>
@@ -191,14 +190,14 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
 
               {/* Quick Role Change */}
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold text-text-muted block">
+                <label className="text-caption font-semibold text-text-muted block">
                   {t('admin_set_role')}
                 </label>
                 <div className="grid grid-cols-3 gap-1.5">
                   {([
-                    { role: 'member',  label: 'Member',  color: '#94a3b8', bg: '#94a3b815' },
+                    { role: 'member', label: 'Member', color: '#94a3b8', bg: '#94a3b815' },
                     { role: 'premium', label: 'Premium', color: '#a78bfa', bg: '#a78bfa15' },
-                    { role: 'admin',   label: 'Admin',   color: '#f59e0b', bg: '#f59e0b15' },
+                    { role: 'admin', label: 'Admin', color: '#f59e0b', bg: '#f59e0b15' },
                   ] as const).map(r => (
                     <button key={r.role}
                       onClick={async () => {
@@ -208,7 +207,7 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
                         onUpdate();
                       }}
                       disabled={isUpdating || user.role === r.role}
-                      className="py-2 rounded-xl text-[11px] font-semibold border transition-all disabled:opacity-40"
+                      className="py-2 rounded-xl text-caption font-semibold border transition-all disabled:opacity-40"
                       style={{
                         color: r.color,
                         backgroundColor: user.role === r.role ? r.bg : undefined,
@@ -222,20 +221,20 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
 
               {/* Add premium days */}
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold text-text-muted block">
+                <label className="text-caption font-semibold text-text-muted block">
                   {t('admin_add_days_label')}
                 </label>
-                <p className="text-[9px] text-text-muted -mt-1">
+                <p className="text-tiny text-text-muted -mt-1">
                   {t('admin_add_days_hint')}
                 </p>
                 <div className="flex gap-2">
                   <input
                     type="number" value={daysInput}
                     onChange={e => setDaysInput(e.target.value)}
-                    className="flex-1 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2.5 text-sm text-text-primary outline-none focus:border-[#7c6aff]/50 transition-all"
+                    className="flex-1 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2.5 text-body text-text-primary outline-none focus:border-[#7c6aff]/50 transition-all"
                   />
                   <button onClick={handleAddDays} disabled={isUpdating}
-                    className="px-5 bg-[#7c6aff] hover:bg-[#6c5aef] text-white font-black text-[9px] rounded-xl transition-all disabled:opacity-50">
+                    className="px-5 bg-[#7c6aff] hover:bg-[#6c5aef] text-white font-black text-tiny rounded-xl transition-all disabled:opacity-50">
                     {t('admin_add_days_btn')}
                   </button>
                 </div>
@@ -243,40 +242,40 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
 
               {/* Set exact expiry date */}
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold text-text-muted block">
+                <label className="text-caption font-semibold text-text-muted block">
                   {t('admin_expiry_label')}
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="date" value={expiryDate}
                     onChange={e => setExpiryDate(e.target.value)}
-                    className="flex-1 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2.5 text-sm text-text-primary outline-none focus:border-[#7c6aff]/50 transition-all"
+                    className="flex-1 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2.5 text-body text-text-primary outline-none focus:border-[#7c6aff]/50 transition-all"
                   />
                   <button onClick={handleSaveExpiry} disabled={isUpdating}
-                    className="px-4 bg-[var(--bg-card)] border border-[var(--border-color)] text-text-primary font-black text-[9px] rounded-xl hover:border-[#7c6aff]/50 disabled:opacity-50 transition-all">
+                    className="px-4 bg-[var(--bg-card)] border border-[var(--border-color)] text-text-primary font-black text-tiny rounded-xl hover:border-[#7c6aff]/50 disabled:opacity-50 transition-all">
                     {t('admin_expiry_save')}
                   </button>
                 </div>
-                {!expiryDate && <p className="text-[9px] text-text-muted">{t('admin_expiry_none')}</p>}
+                {!expiryDate && <p className="text-tiny text-text-muted">{t('admin_expiry_none')}</p>}
               </div>
 
               {/* Reset to Free */}
               <div className="pt-2 border-t border-[var(--border-color)]">
                 {!showResetConfirm ? (
                   <button onClick={() => setShowResetConfirm(true)}
-                    className="w-full py-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl font-black text-[9px] hover:bg-red-500/15 flex items-center justify-center gap-2 transition-all">
+                    className="w-full py-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl font-black text-tiny hover:bg-red-500/15 flex items-center justify-center gap-2 transition-all">
                     <RotateCcw size={13} /> {t('admin_reset_plan_btn')}
                   </button>
                 ) : (
                   <div className="bg-red-500/5 border border-red-500/20 p-4 rounded-xl space-y-3 text-center">
-                    <p className="text-[12px] font-semibold text-text-primary">{t('admin_reset_plan_confirm')}</p>
+                    <p className="text-sub font-semibold text-text-primary">{t('admin_reset_plan_confirm')}</p>
                     <div className="flex gap-2">
                       <button onClick={handleResetPlan} disabled={isUpdating}
-                        className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-[9px] disabled:opacity-50">
+                        className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-tiny disabled:opacity-50">
                         {t('btn_confirm')}
                       </button>
                       <button onClick={() => setShowResetConfirm(false)}
-                        className="flex-1 py-2.5 bg-[var(--bg-input)] text-text-muted rounded-xl font-black text-[9px]">
+                        className="flex-1 py-2.5 bg-[var(--bg-input)] text-text-muted rounded-xl font-black text-tiny">
                         {t('btn_cancel')}
                       </button>
                     </div>
@@ -296,7 +295,7 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
                 className="w-full flex items-center justify-between p-4 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl hover:border-[#7c6aff]/40 disabled:opacity-50 transition-all">
                 <div className="flex items-center gap-3">
                   <Key size={14} className="text-[#a78bfa]" />
-                  <span className="text-[12px] font-semibold text-text-primary">{t('admin_send_reset_email')}</span>
+                  <span className="text-sub font-semibold text-text-primary">{t('admin_send_reset_email')}</span>
                 </div>
                 <Send size={12} className="text-text-muted" />
               </button>
@@ -305,35 +304,33 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
               <div className="pt-3 border-t border-[var(--border-color)] space-y-3">
                 <div className="flex items-center gap-2 text-orange-400">
                   <Ban size={14} />
-                  <h4 className="text-[11px] font-semibold">{t('admin_status_control')}</h4>
+                  <h4 className="text-caption font-semibold">{t('admin_status_control')}</h4>
                 </div>
 
                 {!showBanConfirm ? (
                   <button onClick={() => setShowBanConfirm(true)}
-                    className={`w-full py-3 rounded-xl font-black text-[9px] flex items-center justify-center gap-2 border transition-all ${
-                      isBanned
+                    className={`w-full py-3 rounded-xl font-black text-tiny flex items-center justify-center gap-2 border transition-all ${isBanned
                         ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/15'
                         : 'text-orange-400 border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/15'
-                    }`}>
+                      }`}>
                     <Ban size={13} />
                     {isBanned ? t('admin_unban_btn') : t('admin_ban_btn')}
                   </button>
                 ) : (
                   <div className="bg-orange-500/5 border border-orange-500/20 p-4 rounded-xl space-y-3 text-center">
-                    <p className="text-[12px] font-semibold text-text-primary leading-relaxed">
+                    <p className="text-sub font-semibold text-text-primary leading-relaxed">
                       {isBanned
                         ? t('admin_unban_confirm', { email: user.email })
                         : t('admin_ban_confirm', { email: user.email })}
                     </p>
                     <div className="flex gap-2">
                       <button onClick={handleBanToggle} disabled={isUpdating}
-                        className={`flex-1 py-2.5 text-white rounded-xl font-black text-[9px] disabled:opacity-50 ${
-                          isBanned ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-orange-500 hover:bg-orange-600'
-                        }`}>
+                        className={`flex-1 py-2.5 text-white rounded-xl font-black text-tiny disabled:opacity-50 ${isBanned ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-orange-500 hover:bg-orange-600'
+                          }`}>
                         {t('btn_confirm')}
                       </button>
                       <button onClick={() => setShowBanConfirm(false)}
-                        className="flex-1 py-2.5 bg-[var(--bg-input)] text-text-muted rounded-xl font-black text-[9px]">
+                        className="flex-1 py-2.5 bg-[var(--bg-input)] text-text-muted rounded-xl font-black text-tiny">
                         {t('btn_cancel')}
                       </button>
                     </div>
@@ -345,27 +342,27 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
               <div className="pt-3 border-t border-red-500/10 space-y-3">
                 <div className="flex items-center gap-2 text-red-500">
                   <ShieldAlert size={14} />
-                  <h4 className="text-[11px] font-semibold">{t('admin_critical_zone')}</h4>
+                  <h4 className="text-caption font-semibold">{t('admin_critical_zone')}</h4>
                 </div>
 
                 {!showDeleteConfirm ? (
                   <button onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full py-3 bg-red-500/5 text-red-400 border border-red-500/20 rounded-xl font-black text-[9px] flex items-center justify-center gap-2 hover:bg-red-500/10 transition-all">
+                    className="w-full py-3 bg-red-500/5 text-red-400 border border-red-500/20 rounded-xl font-black text-tiny flex items-center justify-center gap-2 hover:bg-red-500/10 transition-all">
                     <UserMinus size={13} /> {t('admin_delete_account_btn')}
                   </button>
                 ) : (
                   <div className="bg-red-500/10 border border-red-500/30 p-5 rounded-xl space-y-4 text-center">
                     <AlertTriangle size={28} className="text-red-500 mx-auto" />
-                    <p className="text-[12px] font-semibold text-text-primary leading-relaxed">
+                    <p className="text-sub font-semibold text-text-primary leading-relaxed">
                       {t('admin_delete_confirm', { email: user.email })}
                     </p>
                     <div className="flex gap-2">
                       <button onClick={handleDelete} disabled={isUpdating}
-                        className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-black text-[9px] disabled:opacity-50">
+                        className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-black text-tiny disabled:opacity-50">
                         {t('btn_confirm')}
                       </button>
                       <button onClick={() => setShowDeleteConfirm(false)}
-                        className="flex-1 py-2.5 bg-[var(--bg-input)] text-text-muted rounded-xl font-black text-[9px]">
+                        className="flex-1 py-2.5 bg-[var(--bg-input)] text-text-muted rounded-xl font-black text-tiny">
                         {t('btn_cancel')}
                       </button>
                     </div>
@@ -379,7 +376,7 @@ export const AdminUserManage: React.FC<AdminUserManageProps> = ({ user, onClose,
 
       {/* Footer */}
       <div className="px-5 py-3 bg-[var(--bg-input)]/20 border-t border-[var(--border-color)] text-center">
-        <p className="text-[10px] font-semibold text-text-muted">{t('admin_session_footer')}</p>
+        <p className="text-tiny font-semibold text-text-muted">{t('admin_session_footer')}</p>
       </div>
     </div>
   );

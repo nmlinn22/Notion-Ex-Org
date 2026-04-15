@@ -379,7 +379,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
 
   const sectionLabel = (text: string) => (
-    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">{text}</p>
+    <p className="text-tiny font-black text-text-muted uppercase tracking-widest px-1">{text}</p>
   );
 
   // iOS-style row helper
@@ -397,7 +397,7 @@ export const Profile: React.FC<ProfileProps> = ({
       </div>
       <div className="flex-1 text-left">
         <p className={`text-[13.5px] font-medium ${danger ? 'text-red-400' : 'text-[var(--text-primary)]'}`}>{label}</p>
-        {sublabel && <p className="text-[11px] text-[var(--text-muted)] mt-0.5">{sublabel}</p>}
+        {sublabel && <p className="text-caption text-[var(--text-muted)] mt-0.5">{sublabel}</p>}
       </div>
       {right && <div className="shrink-0">{right}</div>}
     </button>
@@ -462,7 +462,7 @@ export const Profile: React.FC<ProfileProps> = ({
                 value={nameInput}
                 onChange={e => setNameInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setEditingName(false); }}
-                className="text-sm font-semibold bg-[var(--bg-input)] border border-[#7c6aff]/60 rounded-lg px-2 py-1 outline-none flex-1 min-w-0 text-[var(--text-primary)]"
+                className="text-body font-semibold bg-[var(--bg-input)] border border-[#7c6aff]/60 rounded-lg px-2 py-1 outline-none flex-1 min-w-0 text-[var(--text-primary)]"
                 placeholder={t('profile_display_name_placeholder')}
                 maxLength={30}
               />
@@ -475,31 +475,31 @@ export const Profile: React.FC<ProfileProps> = ({
             </div>
           ) : (
             <button onClick={() => { setNameInput(displayName); setEditingName(true); }} className="group flex items-center gap-1 text-left w-full">
-              <span className="text-[15px] font-semibold text-[var(--text-primary)] group-hover:text-[#a78bfa] transition-colors truncate">
-                {displayName || <span className="text-[var(--text-muted)] font-normal text-sm">{t('profile_add_display_name')}</span>}
+              <span className="text-title font-semibold text-[var(--text-primary)] group-hover:text-[#a78bfa] transition-colors truncate">
+                {displayName || <span className="text-[var(--text-muted)] font-normal text-body">{t('profile_add_display_name')}</span>}
               </span>
               <Settings size={10} className="text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             </button>
           )}
-          <p className="text-[11px] text-[var(--text-muted)] truncate mt-0.5">{email}</p>
-          {joinedAt && <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{t('profile_joined')} {joinedAt}</p>}
+          <p className="text-caption text-[var(--text-muted)] truncate mt-0.5">{email}</p>
+          {joinedAt && <p className="text-tiny text-[var(--text-muted)] mt-0.5">{t('profile_joined')} {joinedAt}</p>}
           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
             {userRole === 'admin' || isAdmin ? (
-              <span className="text-[9px] font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/25 px-1.5 py-0.5 rounded-full">👑 {t('role_admin')}</span>
+              <span className="text-tiny font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/25 px-1.5 py-0.5 rounded-full">👑 {t('role_admin')}</span>
             ) : userRole === 'premium' ? (
-              <span className="text-[9px] font-semibold bg-[#7c6aff]/15 text-[#a78bfa] border border-[#7c6aff]/25 px-1.5 py-0.5 rounded-full flex items-center gap-1">
+              <span className="text-tiny font-semibold bg-[#7c6aff]/15 text-[#a78bfa] border border-[#7c6aff]/25 px-1.5 py-0.5 rounded-full flex items-center gap-1">
                 ⭐ {t('role_premium')}
                 {premiumExpiresAt && (() => {
                   const days = Math.ceil((new Date(premiumExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                   return days > 0
-                    ? <span className="bg-[#7c6aff]/20 px-1 rounded-full text-[8px]">{days} ရက်ကျန်</span>
-                    : <span className="bg-red-500/20 text-red-400 px-1 rounded-full text-[8px]">သက်တမ်းကုန်</span>;
+                    ? <span className="bg-[#7c6aff]/20 px-1 rounded-full text-tiny">{days} ရက်ကျန်</span>
+                    : <span className="bg-red-500/20 text-red-400 px-1 rounded-full text-tiny">သက်တမ်းကုန်</span>;
                 })()}
               </span>
             ) : (
-              <span className="text-[9px] font-semibold bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)] px-1.5 py-0.5 rounded-full">{t('role_member')}</span>
+              <span className="text-tiny font-semibold bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)] px-1.5 py-0.5 rounded-full">{t('role_member')}</span>
             )}
-            <span className="text-[9px] text-[var(--text-muted)] bg-[var(--bg-input)] border border-[var(--border-color)] px-1.5 py-0.5 rounded-full">
+            <span className="text-tiny text-[var(--text-muted)] bg-[var(--bg-input)] border border-[var(--border-color)] px-1.5 py-0.5 rounded-full">
               {storageMode === 'app' ? t('profile_app_only') : t('profile_notion_sync')}
             </span>
           </div>
@@ -508,7 +508,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
       {/* Preferences */}
       <motion.div {...si(2)} className="flex flex-col gap-2 px-4">
-        <p className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-1">{t('profile_preferences')}</p>
+        <p className="text-caption font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-1">{t('profile_preferences')}</p>
         <GroupBox>
           <Row
             icon={theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
@@ -530,24 +530,24 @@ export const Profile: React.FC<ProfileProps> = ({
               </div>
               <div className="flex-1">
                 <p className="text-[13.5px] font-medium text-[var(--text-primary)]">{t('profile_storage_mode')}</p>
-                <p className="text-[11px] text-[var(--text-muted)]">{t('profile_storage_hint')}</p>
+                <p className="text-caption text-[var(--text-muted)]">{t('profile_storage_hint')}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-1.5">
               {/* App Only — always available */}
               <button onClick={() => setStorageMode('app')}
-                className={`py-2 rounded-xl text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 ${storageMode === 'app' ? 'bg-[#7c6aff] text-white shadow-md shadow-[#7c6aff]/20' : 'bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)]'
+                className={`py-2 rounded-xl text-sub font-semibold transition-all flex items-center justify-center gap-1.5 ${storageMode === 'app' ? 'bg-[#7c6aff] text-white shadow-md shadow-[#7c6aff]/20' : 'bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)]'
                   }`}>
                 <Smartphone size={11} />{t('profile_app_only')}
               </button>
               {/* Notion Sync — Premium/Admin only */}
               <button
                 onClick={() => !canUseNotion ? onOpenPremium?.() : setStorageMode('notion')}
-                className={`py-2 rounded-xl text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 relative overflow-hidden ${!canUseNotion
-                    ? 'bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-amber-500/30'
-                    : storageMode === 'notion'
-                      ? 'bg-[#7c6aff] text-white shadow-md shadow-[#7c6aff]/20'
-                      : 'bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)]'
+                className={`py-2 rounded-xl text-sub font-semibold transition-all flex items-center justify-center gap-1.5 relative overflow-hidden ${!canUseNotion
+                  ? 'bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-amber-500/30'
+                  : storageMode === 'notion'
+                    ? 'bg-[#7c6aff] text-white shadow-md shadow-[#7c6aff]/20'
+                    : 'bg-[var(--bg-input)] text-[var(--text-muted)] border border-[var(--border-color)]'
                   }`}>
                 <Database size={11} />
                 {t('profile_notion_sync')}
@@ -562,7 +562,7 @@ export const Profile: React.FC<ProfileProps> = ({
 
       {/* Account & Security */}
       <motion.div {...si(3)} className="flex flex-col gap-2 px-4">
-        <p className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-1">{t('profile_account_security')}</p>
+        <p className="text-caption font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-1">{t('profile_account_security')}</p>
         <GroupBox>
           <Row
             icon={<KeyRound size={15} />}
@@ -608,7 +608,7 @@ export const Profile: React.FC<ProfileProps> = ({
             >
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--border-color)] flex-shrink-0">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">Choose Avatar</h3>
+                <h3 className="text-body font-bold text-[var(--text-primary)]">Choose Avatar</h3>
                 <div className="flex items-center gap-2">
                   {savingIcon && <Loader2 size={15} className="text-[#a78bfa] animate-spin" />}
                   <button onClick={() => setShowIconPicker(false)}
@@ -640,7 +640,7 @@ export const Profile: React.FC<ProfileProps> = ({
                             </div>
                           )}
                         </div>
-                        <span className="text-[9px] text-text-muted font-medium leading-tight text-center">{icon.label}</span>
+                        <span className="text-tiny text-text-muted font-medium leading-tight text-center">{icon.label}</span>
                       </button>
                     );
                   })}
@@ -670,15 +670,15 @@ export const Profile: React.FC<ProfileProps> = ({
                 <div className="w-9 h-9 rounded-xl bg-[#7c6aff]/10 flex items-center justify-center">
                   <KeyRound size={17} className="text-[#a78bfa]" />
                 </div>
-                <h3 className="text-base font-bold text-[var(--text-primary)]">{t('profile_change_password')}</h3>
+                <h3 className="text-title font-bold text-[var(--text-primary)]">{t('profile_change_password')}</h3>
               </div>
               <div className="flex flex-col gap-3">
                 <div>
-                  <label className="text-[11px] font-semibold text-text-muted mb-1.5 block">{t('profile_new_password')}</label>
+                  <label className="text-caption font-semibold text-text-muted mb-1.5 block">{t('profile_new_password')}</label>
                   <div className="relative">
                     <input type={showNewPw ? 'text' : 'password'} value={newPassword}
                       onChange={e => setNewPassword(e.target.value)} placeholder={t('auth_new_password_placeholder')}
-                      className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-[#7c6aff]/60 text-[var(--text-primary)] pr-9" />
+                      className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-body outline-none focus:border-[#7c6aff]/60 text-[var(--text-primary)] pr-9" />
                     <button type="button" onClick={() => setShowNewPw(v => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">
                       {showNewPw ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -686,12 +686,12 @@ export const Profile: React.FC<ProfileProps> = ({
                   </div>
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-text-muted mb-1.5 block">{t('profile_confirm_password')}</label>
+                  <label className="text-caption font-semibold text-text-muted mb-1.5 block">{t('profile_confirm_password')}</label>
                   <div className="relative">
                     <input type={showConfirmPw ? 'text' : 'password'} value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)} placeholder={t('auth_confirm_password_placeholder')}
                       onKeyDown={e => e.key === 'Enter' && handleChangePassword()}
-                      className={`w-full bg-[var(--bg-input)] border rounded-xl px-3.5 py-2.5 text-sm outline-none text-[var(--text-primary)] pr-9 transition-colors ${confirmPassword && confirmPassword !== newPassword ? 'border-red-500/50' : 'border-[var(--border-color)] focus:border-[#7c6aff]/60'
+                      className={`w-full bg-[var(--bg-input)] border rounded-xl px-3.5 py-2.5 text-body outline-none text-[var(--text-primary)] pr-9 transition-colors ${confirmPassword && confirmPassword !== newPassword ? 'border-red-500/50' : 'border-[var(--border-color)] focus:border-[#7c6aff]/60'
                         }`} />
                     <button type="button" onClick={() => setShowConfirmPw(v => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">
@@ -699,17 +699,17 @@ export const Profile: React.FC<ProfileProps> = ({
                     </button>
                   </div>
                   {confirmPassword && confirmPassword !== newPassword && (
-                    <p className="text-[10px] text-red-400 mt-1 ml-1">{t('auth_passwords_no_match')}</p>
+                    <p className="text-tiny text-red-400 mt-1 ml-1">{t('auth_passwords_no_match')}</p>
                   )}
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => { setShowPasswordModal(false); setNewPassword(''); setConfirmPassword(''); }}
-                    className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted font-semibold text-sm hover:text-text-primary transition-all">
+                    className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted font-semibold text-body hover:text-text-primary transition-all">
                     {t('btn_cancel')}
                   </button>
                   <button onClick={handleChangePassword}
                     disabled={isChangingPw || newPassword.length < 6 || newPassword !== confirmPassword}
-                    className="flex-1 h-10 rounded-xl bg-[#7c6aff] text-white font-bold text-sm flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 hover:bg-[#a78bfa]">
+                    className="flex-1 h-10 rounded-xl bg-[#7c6aff] text-white font-bold text-body flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 hover:bg-[#a78bfa]">
                     {isChangingPw ? <Loader2 size={14} className="animate-spin" /> : null}
                     {isChangingPw ? t('saving') : t('btn_save')}
                   </button>
@@ -740,8 +740,8 @@ export const Profile: React.FC<ProfileProps> = ({
                   <AlertTriangle size={24} className="text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[var(--text-primary)]">{t('profile_delete_account')}</h3>
-                  <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                  <h3 className="text-title font-bold text-[var(--text-primary)]">{t('profile_delete_account')}</h3>
+                  <p className="text-sub text-text-muted mt-1 leading-relaxed">
                     {t('profile_delete_desc')}<br />
                     {t('profile_delete_type', { word: 'CONFIRM' })}
                   </p>
@@ -749,15 +749,15 @@ export const Profile: React.FC<ProfileProps> = ({
                 <input type="text" value={deleteConfirmText}
                   onChange={e => setDeleteConfirmText(e.target.value)}
                   placeholder="CONFIRM" autoCapitalize="characters"
-                  className="w-full bg-[var(--bg-input)] border border-red-500/30 rounded-xl px-4 py-2.5 text-sm font-black text-center outline-none focus:border-red-500/60 text-[var(--text-primary)] placeholder:font-normal tracking-widest" />
+                  className="w-full bg-[var(--bg-input)] border border-red-500/30 rounded-xl px-4 py-2.5 text-body font-black text-center outline-none focus:border-red-500/60 text-[var(--text-primary)] placeholder:font-normal tracking-widest" />
                 <div className="flex gap-2 w-full">
                   <button onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(''); }}
-                    className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted font-semibold text-sm hover:text-text-primary transition-all">
+                    className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted font-semibold text-body hover:text-text-primary transition-all">
                     {t('btn_cancel')}
                   </button>
                   <button onClick={handleDeleteAccount}
                     disabled={deleteConfirmText !== 'CONFIRM' || isDeleting}
-                    className="flex-1 h-10 rounded-xl bg-red-500 text-white font-bold text-sm flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 hover:bg-red-400">
+                    className="flex-1 h-10 rounded-xl bg-red-500 text-white font-bold text-body flex items-center justify-center gap-1.5 transition-all disabled:opacity-40 hover:bg-red-400">
                     {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                     {isDeleting ? t('deleting') : t('btn_delete')}
                   </button>

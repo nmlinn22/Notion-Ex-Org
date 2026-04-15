@@ -19,10 +19,10 @@ const Step: React.FC<StepProps> = ({ number, title, children, defaultOpen = fals
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-3 p-3.5 bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] transition-colors text-left"
       >
-        <div className="w-7 h-7 rounded-lg bg-[#7c6aff]/20 text-[#a78bfa] text-xs font-black flex items-center justify-center shrink-0">
+        <div className="w-7 h-7 rounded-lg bg-[#7c6aff]/20 text-[#a78bfa] text-sub font-black flex items-center justify-center shrink-0">
           {number}
         </div>
-        <span className="flex-1 text-sm font-bold text-text-primary">{title}</span>
+        <span className="flex-1 text-body font-bold text-text-primary">{title}</span>
         {open ? <ChevronUp size={15} className="text-text-muted shrink-0" /> : <ChevronDown size={15} className="text-text-muted shrink-0" />}
       </button>
       {open && (
@@ -36,19 +36,19 @@ const Step: React.FC<StepProps> = ({ number, title, children, defaultOpen = fals
 
 const Tip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex gap-2 p-3 bg-[#7c6aff]/8 border border-[#7c6aff]/20 rounded-xl">
-    <span className="text-[#a78bfa] text-xs mt-0.5 shrink-0">💡</span>
-    <p className="text-xs text-text-muted leading-relaxed">{children}</p>
+    <span className="text-[#a78bfa] text-sub mt-0.5 shrink-0">💡</span>
+    <p className="text-sub text-text-muted leading-relaxed">{children}</p>
   </div>
 );
 
 const Code: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <code className="bg-black/20 text-[#a78bfa] text-[10px] font-mono px-1.5 py-0.5 rounded-md">{children}</code>
+  <code className="bg-black/20 text-[#a78bfa] text-tiny font-mono px-1.5 py-0.5 rounded-md">{children}</code>
 );
 
 const Li: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex items-start gap-2">
     <Check size={12} className="text-emerald-400 mt-0.5 shrink-0" />
-    <p className="text-xs text-text-muted leading-relaxed">{children}</p>
+    <p className="text-sub text-text-muted leading-relaxed">{children}</p>
   </div>
 );
 
@@ -57,32 +57,6 @@ export const NotionGuide: React.FC<{ onOpenPremium?: () => void }> = ({ onOpenPr
 
   return (
     <div className="space-y-3">
-
-      {/* Premium Banner */}
-      <div className="p-4 rounded-2xl bg-[#7c6aff]/8 border border-[#7c6aff]/25 flex gap-3">
-        <div className="w-9 h-9 rounded-xl bg-[#7c6aff]/15 flex items-center justify-center shrink-0 mt-0.5">
-          <span className="text-base">👑</span>
-        </div>
-        <div className="space-y-1.5 flex-1">
-          <p className="text-[12px] font-bold text-[var(--text-primary)]">{t('notion_guide_banner_title')}</p>
-          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-            {t('notion_guide_banner_desc')}
-          </p>
-          <button
-            onClick={() => onOpenPremium?.()}
-            className="mt-1 px-3 py-1.5 rounded-lg bg-[#7c6aff] text-white text-[11px] font-bold hover:bg-[#8b7aff] transition-all"
-          >
-            {t('notion_guide_banner_btn')}
-          </button>
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div className="flex items-center gap-2 px-1">
-        <div className="flex-1 h-px bg-[var(--border-color)]" />
-        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">{t('notion_guide_divider')}</p>
-        <div className="flex-1 h-px bg-[var(--border-color)]" />
-      </div>
 
       {/* Template Button */}
       <a
@@ -95,17 +69,17 @@ export const NotionGuide: React.FC<{ onOpenPremium?: () => void }> = ({ onOpenPr
           <span className="text-2xl">📋</span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-base font-black text-white">{t('notion_guide_template_title')}</div>
-          <div className="text-xs text-white/70 mt-0.5">{t('notion_guide_template_subtitle')}</div>
+          <div className="text-title font-black text-white">{t('notion_guide_template_title')}</div>
+          <div className="text-sub text-white/70 mt-0.5">{t('notion_guide_template_subtitle')}</div>
         </div>
         <div className="flex flex-col items-center gap-1 shrink-0">
           <ExternalLink size={18} className="text-white/80" />
-          <span className="text-[9px] text-white/60 font-bold uppercase tracking-wide">{t('notion_guide_template_open')}</span>
+          <span className="text-tiny text-white/60 font-bold uppercase tracking-wide">{t('notion_guide_template_open')}</span>
         </div>
       </a>
 
       {/* Step by step guide */}
-      <p className="text-[11px] font-bold text-text-muted px-1 pt-1">{t('notion_guide_steps_label')}</p>
+      <p className="text-caption font-bold text-text-muted px-1 pt-1">{t('notion_guide_steps_label')}</p>
 
       <Step number={1} title={t('notion_step1_title')} defaultOpen={true}>
         <Li>
@@ -176,7 +150,7 @@ export const NotionGuide: React.FC<{ onOpenPremium?: () => void }> = ({ onOpenPr
       <Step number={4} title={t('notion_step4_title')}>
         <Li>{t('notion_step4_li1')}</Li>
         <Li>{t('notion_step4_li2')}</Li>
-        <div className="bg-black/20 rounded-xl p-3 font-mono text-[10px] leading-relaxed">
+        <div className="bg-black/20 rounded-xl p-3 font-mono text-tiny leading-relaxed">
           <span className="text-text-muted">notion.so/</span>
           <span className="text-emerald-400 font-bold">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
           <span className="text-text-muted">?v=...</span>

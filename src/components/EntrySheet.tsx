@@ -105,7 +105,7 @@ export const EntrySheet: React.FC<EntrySheetProps> = ({
                   <div className="px-4 py-4 pb-32 max-h-[88vh] overflow-y-auto">
                     <div className="w-10 h-1 bg-[var(--border-color)] rounded-full mx-auto mb-4" />
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-base font-black">{mode === 'edit' ? t('entry_edit_title') : t('entry_add_title')}</h3>
+                      <h3 className="text-title font-black">{mode === 'edit' ? t('entry_edit_title') : t('entry_add_title')}</h3>
                       <div className="flex items-center gap-2">
                         {mode === 'edit' && onDelete && (
                           <button onClick={() => setConfirmDelete(true)}
@@ -118,7 +118,7 @@ export const EntrySheet: React.FC<EntrySheetProps> = ({
                     <div className="flex gap-1 mb-4 bg-[var(--bg-input)] p-1 rounded-xl">
                       {(['expense', 'income'] as const).map(tp => (
                         <button key={tp} onClick={() => setType(tp)}
-                          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${type === tp ? (tp === 'expense' ? 'bg-[#f87171] text-white shadow-md' : 'bg-[#34d399] text-white shadow-md') : 'text-text-muted'}`}>
+                          className={`flex-1 py-2 rounded-lg text-sub font-bold transition-all ${type === tp ? (tp === 'expense' ? 'bg-[#f87171] text-white shadow-md' : 'bg-[#34d399] text-white shadow-md') : 'text-text-muted'}`}>
                           {tp === 'expense' ? '− Expense' : '+ Income'}
                         </button>
                       ))}
@@ -126,32 +126,32 @@ export const EntrySheet: React.FC<EntrySheetProps> = ({
 
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-bold text-text-muted mb-1.5 block">Item name *</label>
+                        <label className="text-sub font-bold text-text-muted mb-1.5 block">Item name *</label>
                         <input type="text" value={item} onChange={e => setItem(e.target.value)}
                           placeholder="e.g. Lunch, Rent, Salary..."
-                          className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs outline-none focus:border-[#7c6aff]/50 transition-all" />
+                          className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-sub outline-none focus:border-[#7c6aff]/50 transition-all" />
                       </div>
                       <div className="grid grid-cols-2 gap-2.5">
                         <div>
-                          <label className="text-xs font-bold text-text-muted mb-1.5 block">Amount *</label>
+                          <label className="text-sub font-bold text-text-muted mb-1.5 block">Amount *</label>
                           <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0"
-                            className={`w-full bg-[var(--bg-input)] border rounded-lg px-3 py-2.5 text-xs font-mono outline-none transition-all ${type === 'expense' ? 'border-[#f87171]/30 focus:border-[#f87171]/60' : 'border-[#34d399]/30 focus:border-[#34d399]/60'}`} />
+                            className={`w-full bg-[var(--bg-input)] border rounded-lg px-3 py-2.5 text-sub font-mono outline-none transition-all ${type === 'expense' ? 'border-[#f87171]/30 focus:border-[#f87171]/60' : 'border-[#34d399]/30 focus:border-[#34d399]/60'}`} />
                         </div>
                         <div>
-                          <label className="text-xs font-bold text-text-muted mb-1.5 block">Date</label>
+                          <label className="text-sub font-bold text-text-muted mb-1.5 block">Date</label>
                           <input type="date" value={date} onChange={e => setDate(e.target.value)}
-                            className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs outline-none focus:border-[#7c6aff]/50 transition-all" />
+                            className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-sub outline-none focus:border-[#7c6aff]/50 transition-all" />
                         </div>
                       </div>
 
                       {/* Group */}
                       <div>
-                        <label className="text-xs font-bold text-text-muted mb-1.5 flex items-center justify-between">
+                        <label className="text-sub font-bold text-text-muted mb-1.5 flex items-center justify-between">
                           <span>Group</span>
-                          <button onClick={() => setPickerType('group')} className="text-[10px] text-[#a78bfa] font-semibold flex items-center gap-1 px-2 py-0.5 bg-[#7c6aff]/10 rounded-md hover:bg-[#7c6aff]/20 transition-all">+ Add New</button>
+                          <button onClick={() => setPickerType('group')} className="text-tiny text-[#a78bfa] font-semibold flex items-center gap-1 px-2 py-0.5 bg-[#7c6aff]/10 rounded-md hover:bg-[#7c6aff]/20 transition-all">+ Add New</button>
                         </label>
                         <button onClick={() => setPickerType('group')}
-                          className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs text-left flex items-center justify-between hover:border-[#7c6aff]/40 transition-all">
+                          className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-sub text-left flex items-center justify-between hover:border-[#7c6aff]/40 transition-all">
                           <span className={group ? 'text-text-primary font-medium' : 'text-text-muted'}>{group || 'Select...'}</span>
                           <ChevronRight size={16} className="text-text-muted" />
                         </button>
@@ -159,12 +159,12 @@ export const EntrySheet: React.FC<EntrySheetProps> = ({
 
                       {/* Category */}
                       <div>
-                        <label className="text-xs font-bold text-text-muted mb-1.5 flex items-center justify-between">
+                        <label className="text-sub font-bold text-text-muted mb-1.5 flex items-center justify-between">
                           <span>Category</span>
-                          <button onClick={() => setPickerType('category')} className="text-[10px] text-[#a78bfa] font-semibold flex items-center gap-1 px-2 py-0.5 bg-[#7c6aff]/10 rounded-md hover:bg-[#7c6aff]/20 transition-all">+ Add New</button>
+                          <button onClick={() => setPickerType('category')} className="text-tiny text-[#a78bfa] font-semibold flex items-center gap-1 px-2 py-0.5 bg-[#7c6aff]/10 rounded-md hover:bg-[#7c6aff]/20 transition-all">+ Add New</button>
                         </label>
                         <button onClick={() => setPickerType('category')}
-                          className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs text-left flex items-center justify-between hover:border-[#7c6aff]/40 transition-all">
+                          className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-sub text-left flex items-center justify-between hover:border-[#7c6aff]/40 transition-all">
                           <span className={category ? 'text-text-primary font-medium' : 'text-text-muted'}>
                             {category ? <>{CATEGORY_ICONS[category] ?? '📦'} {category}</> : 'Select...'}
                           </span>
@@ -176,7 +176,7 @@ export const EntrySheet: React.FC<EntrySheetProps> = ({
 
                   <div className="absolute bottom-0 left-0 right-0 px-4 pb-6 pt-2 bg-[var(--bg-card)] border-t border-[var(--border-color)]">
                     <button onClick={handleSave} disabled={!item.trim() || !amount}
-                      className="w-full h-11 rounded-lg bg-[#7c6aff] text-white font-bold text-xs hover:bg-[#a78bfa] transition-all shadow-lg shadow-[#7c6aff]/20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                      className="w-full h-11 rounded-lg bg-[#7c6aff] text-white font-bold text-sub hover:bg-[#a78bfa] transition-all shadow-lg shadow-[#7c6aff]/20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                       <Check size={16} /> {mode === 'edit' ? t('btn_save_changes') : t('entry_save')}
                     </button>
                   </div>
@@ -198,7 +198,7 @@ export const EntrySheet: React.FC<EntrySheetProps> = ({
                   style={{ maxHeight: '80vh' }}
                   onClick={e => e.stopPropagation()}>
                   <div className="relative flex items-center justify-between px-4 pt-4 pb-2.5 border-b border-[var(--border-color)] flex-shrink-0">
-                    <h3 className="text-sm font-black">{pickerType === 'group' ? t('entry_picker_group') : t('entry_picker_category')}</h3>
+                    <h3 className="text-body font-black">{pickerType === 'group' ? t('entry_picker_group') : t('entry_picker_category')}</h3>
                     <button onClick={() => { setPickerType(null); setAddingNew(false); }}
                       className="p-2 rounded-xl hover:bg-[var(--bg-input)] text-text-muted"><X size={18} /></button>
                   </div>
@@ -208,7 +208,7 @@ export const EntrySheet: React.FC<EntrySheetProps> = ({
                       <button key={it}
                         onClick={() => { if (pickerType === 'group') setGroup(it); else setCategory(it); setPickerType(null); setAddingNew(false); }}
                         className={`w-full flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]/40 transition-all ${pickerValue === it ? 'bg-[#7c6aff]/10 text-[#a78bfa]' : 'hover:bg-[var(--bg-input)] text-text-primary'}`}>
-                        <span className="flex items-center gap-2.5 text-sm font-medium">
+                        <span className="flex items-center gap-2.5 text-body font-medium">
                           {pickerType === 'category' && <span className="text-lg">{CATEGORY_ICONS[it] ?? '📦'}</span>}
                           {it}
                         </span>
@@ -222,13 +222,13 @@ export const EntrySheet: React.FC<EntrySheetProps> = ({
                           onChange={e => setNewName(e.target.value)}
                           onKeyDown={e => { if (e.key === 'Enter') handleAddNew(); if (e.key === 'Escape') setAddingNew(false); }}
                           placeholder={pickerType === 'group' ? t('entry_group_name_placeholder') : t('entry_category_name_placeholder')}
-                          className="flex-1 bg-[var(--bg-card)] border border-[#7c6aff]/40 rounded-lg px-3 py-2.5 text-xs outline-none" />
-                        <button onClick={handleAddNew} className="px-3.5 py-2.5 bg-[#7c6aff] text-white rounded-lg text-[11px] font-bold">Add</button>
+                          className="flex-1 bg-[var(--bg-card)] border border-[#7c6aff]/40 rounded-lg px-3 py-2.5 text-sub outline-none" />
+                        <button onClick={handleAddNew} className="px-3.5 py-2.5 bg-[#7c6aff] text-white rounded-lg text-caption font-bold">Add</button>
                         <button onClick={() => setAddingNew(false)} className="px-2.5 py-2.5 bg-[var(--bg-input)] text-text-muted rounded-lg"><X size={14} /></button>
                       </div>
                     ) : (
                       <button onClick={() => setAddingNew(true)}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-[#a78bfa] font-bold text-xs hover:bg-[#7c6aff]/5 transition-all border-t border-[var(--border-color)]">
+                        className="w-full flex items-center gap-3 px-4 py-3 text-[#a78bfa] font-bold text-sub hover:bg-[#7c6aff]/5 transition-all border-t border-[var(--border-color)]">
                         <Plus size={14} /> {t('entry_add_new')} {pickerType}
                       </button>
                     )}
@@ -249,15 +249,15 @@ export const EntrySheet: React.FC<EntrySheetProps> = ({
                   className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[150] bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl max-w-sm w-[90%]"
                   onClick={e => e.stopPropagation()}>
                   <div className="p-6">
-                    <h3 className="text-base font-black mb-2">Delete Entry?</h3>
-                    <p className="text-xs text-text-muted mb-6">This action cannot be undone. Are you sure you want to delete this entry?</p>
+                    <h3 className="text-title font-black mb-2">Delete Entry?</h3>
+                    <p className="text-sub text-text-muted mb-6">This action cannot be undone. Are you sure you want to delete this entry?</p>
                     <div className="flex gap-3">
                       <button onClick={() => setConfirmDelete(false)}
-                        className="flex-1 px-4 py-2.5 rounded-lg bg-[var(--bg-input)] text-text-primary font-semibold text-xs hover:bg-[var(--bg-input)]/80 transition-all">
+                        className="flex-1 px-4 py-2.5 rounded-lg bg-[var(--bg-input)] text-text-primary font-semibold text-sub hover:bg-[var(--bg-input)]/80 transition-all">
                         Cancel
                       </button>
                       <button onClick={() => { onDelete?.(); onClose(); setConfirmDelete(false); }}
-                        className="flex-1 px-4 py-2.5 rounded-lg bg-[#f87171] text-white font-semibold text-xs hover:bg-[#ef4444] transition-all">
+                        className="flex-1 px-4 py-2.5 rounded-lg bg-[#f87171] text-white font-semibold text-sub hover:bg-[#ef4444] transition-all">
                         Delete
                       </button>
                     </div>

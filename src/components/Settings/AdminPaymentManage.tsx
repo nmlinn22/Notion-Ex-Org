@@ -92,7 +92,7 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
   }, [payments, search, statusFilter]);
 
   const counts = {
-    pending:  payments.filter(p => p.status === 'pending').length,
+    pending: payments.filter(p => p.status === 'pending').length,
     approved: payments.filter(p => p.status === 'approved').length,
     rejected: payments.filter(p => p.status === 'rejected').length,
   };
@@ -169,13 +169,13 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
 
   const statusBadge = (status: string) => {
     const map: Record<string, { color: string; bg: string; labelKey: string }> = {
-      pending:  { color: '#f59e0b', bg: '#f59e0b15', labelKey: 'payment_status_pending' },
+      pending: { color: '#f59e0b', bg: '#f59e0b15', labelKey: 'payment_status_pending' },
       approved: { color: '#10b981', bg: '#10b98115', labelKey: 'payment_status_approved' },
       rejected: { color: '#ef4444', bg: '#ef444415', labelKey: 'payment_status_rejected' },
     };
     const s = map[status] || map.pending;
     return (
-      <span className="text-[8px] font-bold px-2 py-0.5 rounded-full"
+      <span className="text-tiny font-bold px-2 py-0.5 rounded-full"
         style={{ color: s.color, backgroundColor: s.bg }}>
         {t(s.labelKey as any)}
       </span>
@@ -187,38 +187,37 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
       {/* Summary */}
       <div className="grid grid-cols-3 gap-2">
         {[
-          { labelKey: 'payment_status_pending',  color: '#f59e0b', count: counts.pending },
+          { labelKey: 'payment_status_pending', color: '#f59e0b', count: counts.pending },
           { labelKey: 'payment_status_approved', color: '#10b981', count: counts.approved },
           { labelKey: 'payment_status_rejected', color: '#ef4444', count: counts.rejected },
         ].map(s => (
           <div key={s.labelKey} className="bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl p-3 text-center">
             <div className="text-xl font-black" style={{ color: s.color }}>{s.count}</div>
-            <div className="text-[9px] text-text-muted font-semibold mt-0.5">{t(s.labelKey as any)}</div>
+            <div className="text-tiny text-text-muted font-semibold mt-0.5">{t(s.labelKey as any)}</div>
           </div>
         ))}
       </div>
 
       {/* Refresh */}
       <button onClick={fetchPayments} disabled={loading}
-        className="flex items-center gap-1.5 text-[11px] font-semibold text-text-muted hover:text-text-primary transition-colors">
+        className="flex items-center gap-1.5 text-caption font-semibold text-text-muted hover:text-text-primary transition-colors">
         <RefreshCw size={11} className={loading ? 'animate-spin' : ''} /> {t('admin_refresh_btn')}
       </button>
 
       {/* Status Filter */}
       <div className="flex gap-1 p-1 bg-[var(--bg-input)] rounded-xl border border-[var(--border-color)]">
         {([
-          { id: 'all',      labelKey: 'payment_filter_all',      count: payments.length },
-          { id: 'pending',  labelKey: 'payment_status_pending',  count: counts.pending,  color: '#f59e0b' },
+          { id: 'all', labelKey: 'payment_filter_all', count: payments.length },
+          { id: 'pending', labelKey: 'payment_status_pending', count: counts.pending, color: '#f59e0b' },
           { id: 'approved', labelKey: 'payment_status_approved', count: counts.approved, color: '#10b981' },
           { id: 'rejected', labelKey: 'payment_status_rejected', count: counts.rejected, color: '#ef4444' },
         ] as const).map(f => (
           <button key={f.id} onClick={() => setStatusFilter(f.id)}
-            className={`flex-1 py-1.5 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1 ${
-              statusFilter === f.id ? 'bg-[var(--bg-card)] text-[#a78bfa] shadow' : 'text-text-muted hover:text-text-primary'
-            }`}>
+            className={`flex-1 py-1.5 rounded-lg text-caption font-semibold transition-all flex items-center justify-center gap-1 ${statusFilter === f.id ? 'bg-[var(--bg-card)] text-[#a78bfa] shadow' : 'text-text-muted hover:text-text-primary'
+              }`}>
             {'color' in f && <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: f.color }} />}
             {t(f.labelKey as any)}
-            <span className={`text-[8px] px-1 rounded-full ${statusFilter === f.id ? 'bg-[#7c6aff]/20' : 'bg-[var(--bg-input)]'}`}>{f.count}</span>
+            <span className={`text-tiny px-1 rounded-full ${statusFilter === f.id ? 'bg-[#7c6aff]/20' : 'bg-[var(--bg-input)]'}`}>{f.count}</span>
           </button>
         ))}
       </div>
@@ -229,18 +228,18 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
         placeholder={t('payment_search_placeholder')}
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#7c6aff]/50 transition-all"
+        className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-body outline-none focus:border-[#7c6aff]/50 transition-all"
       />
 
       {/* Payment list */}
       <div className="space-y-3">
         {loading ? (
-          <div className="py-12 text-center text-text-muted text-xs">
+          <div className="py-12 text-center text-text-muted text-sub">
             <RefreshCw size={20} className="animate-spin mx-auto mb-2 opacity-20" />
             {t('admin_loading')}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-12 text-center text-text-muted text-xs italic bg-[var(--bg-input)]/30 rounded-2xl border border-dashed border-[var(--border-color)]">
+          <div className="py-12 text-center text-text-muted text-sub italic bg-[var(--bg-input)]/30 rounded-2xl border border-dashed border-[var(--border-color)]">
             {t('payment_no_results')}
           </div>
         ) : filtered.map((p) => {
@@ -254,19 +253,19 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="text-[13px] font-bold text-text-primary truncate">{p.user_email}</p>
+                      <p className="text-sub font-bold text-text-primary truncate">{p.user_email}</p>
                       {statusBadge(p.status)}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[12px] font-semibold text-[#a78bfa] bg-[#a78bfa]/10 px-2 py-0.5 rounded-md">
+                      <span className="text-sub font-semibold text-[#a78bfa] bg-[#a78bfa]/10 px-2 py-0.5 rounded-md">
                         {p.plan} ({days}d)
                       </span>
-                      <span className="text-[10px] font-bold text-text-muted">
+                      <span className="text-tiny font-bold text-text-muted">
                         {p.payment_method} · {fmt(p.created_at)}
                       </span>
                     </div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setExpandedId(isExpanded ? null : p.id)}
                     className="w-8 h-8 rounded-lg bg-[var(--bg-input)] flex items-center justify-center text-text-muted hover:text-text-primary transition-colors"
                   >
@@ -277,13 +276,13 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
                 {/* Transaction ID & Screenshot */}
                 <div className="flex items-center justify-between gap-3 p-3 bg-[var(--bg-input)]/50 rounded-xl border border-[var(--border-color)] mb-4">
                   <div className="min-w-0">
-                    <p className="text-[11px] font-semibold text-text-muted mb-0.5">{t('payment_txn_id_label')}</p>
-                    <p className="text-[11px] font-mono text-text-primary truncate">{p.transaction_id}</p>
+                    <p className="text-caption font-semibold text-text-muted mb-0.5">{t('payment_txn_id_label')}</p>
+                    <p className="text-caption font-mono text-text-primary truncate">{p.transaction_id}</p>
                   </div>
                   {p.screenshot_url && (
                     <button
                       onClick={() => openScreenshot(p)}
-                      className="flex items-center gap-1.5 text-[10px] font-bold text-[#a78bfa] hover:text-white hover:bg-[#7c6aff] px-3 py-1.5 rounded-lg bg-[#7c6aff]/10 border border-[#7c6aff]/20 transition-all shrink-0"
+                      className="flex items-center gap-1.5 text-tiny font-bold text-[#a78bfa] hover:text-white hover:bg-[#7c6aff] px-3 py-1.5 rounded-lg bg-[#7c6aff]/10 border border-[#7c6aff]/20 transition-all shrink-0"
                     >
                       <ImageIcon size={12} /> {t('payment_screenshot_label')}
                     </button>
@@ -293,8 +292,8 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
                 {/* Reject Reason (if any) */}
                 {p.status === 'rejected' && p.reject_reason && (
                   <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl mb-4">
-                    <p className="text-[11px] font-semibold text-red-400 mb-1">Rejection Reason</p>
-                    <p className="text-[11px] text-red-300/80 leading-relaxed">{p.reject_reason}</p>
+                    <p className="text-caption font-semibold text-red-400 mb-1">Rejection Reason</p>
+                    <p className="text-caption text-red-300/80 leading-relaxed">{p.reject_reason}</p>
                   </div>
                 )}
 
@@ -305,14 +304,14 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
                       <button
                         onClick={() => { setRejectTarget(p); setRejectReason(''); }}
                         disabled={processingId === p.id}
-                        className="flex-1 h-10 rounded-xl border border-red-500/30 text-red-400 text-[11px] font-black hover:bg-red-500/10 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+                        className="flex-1 h-10 rounded-xl border border-red-500/30 text-red-400 text-caption font-black hover:bg-red-500/10 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
                       >
                         <XCircle size={14} /> {t('payment_reject_btn')}
                       </button>
                       <button
                         onClick={() => handleApprove(p)}
                         disabled={processingId === p.id}
-                        className="flex-1 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-black shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+                        className="flex-1 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-caption font-black shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
                       >
                         <CheckCircle size={14} /> {t('payment_approve_btn')} (+{days}d)
                       </button>
@@ -321,7 +320,7 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
                     <button
                       onClick={() => setUndoTarget(p)}
                       disabled={processingId === p.id}
-                      className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted text-[11px] font-black hover:text-text-primary hover:border-[#7c6aff]/40 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+                      className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted text-caption font-black hover:text-text-primary hover:border-[#7c6aff]/40 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
                     >
                       <RotateCcw size={14} /> {t('payment_undo_btn')}
                     </button>
@@ -339,18 +338,18 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
                     className="border-t border-[var(--border-color)] bg-[var(--bg-input)]/30"
                   >
                     <div className="p-4 space-y-3">
-                      <p className="text-[12px] font-semibold text-text-muted">{t('payment_full_details_label')}</p>
+                      <p className="text-sub font-semibold text-text-muted">{t('payment_full_details_label')}</p>
                       <div className="grid gap-2">
                         {[
                           { label: t('payment_txn_id_label'), value: p.transaction_id },
-                          { label: 'Request ID',  value: p.id },
-                          { label: 'User ID',     value: p.user_id },
-                          { label: 'Plan',        value: `${p.plan} (${days} days)` },
-                          { label: 'Method',      value: p.payment_method },
-                          { label: 'Submitted',   value: new Date(p.created_at).toLocaleString() },
-                          { label: 'Status',      value: p.status },
+                          { label: 'Request ID', value: p.id },
+                          { label: 'User ID', value: p.user_id },
+                          { label: 'Plan', value: `${p.plan} (${days} days)` },
+                          { label: 'Method', value: p.payment_method },
+                          { label: 'Submitted', value: new Date(p.created_at).toLocaleString() },
+                          { label: 'Status', value: p.status },
                         ].map(row => (
-                          <div key={row.label} className="flex justify-between gap-4 text-[11px]">
+                          <div key={row.label} className="flex justify-between gap-4 text-caption">
                             <span className="text-text-muted">{row.label}</span>
                             <span className="font-mono text-text-primary text-right break-all">{row.value}</span>
                           </div>
@@ -379,8 +378,8 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
             >
               <div className="px-4 py-3 border-b border-[var(--border-color)] flex items-center justify-between">
                 <div>
-                  <span className="text-[12px] font-semibold text-red-400">{t('payment_reject_modal_title')}</span>
-                  <p className="text-[10px] text-text-muted mt-0.5 truncate max-w-[200px]">{rejectTarget.user_email}</p>
+                  <span className="text-sub font-semibold text-red-400">{t('payment_reject_modal_title')}</span>
+                  <p className="text-tiny text-text-muted mt-0.5 truncate max-w-[200px]">{rejectTarget.user_email}</p>
                 </div>
                 <button onClick={() => setRejectTarget(null)} className="text-text-muted hover:text-text-primary">
                   <X size={16} />
@@ -388,7 +387,7 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
               </div>
               <div className="p-4 space-y-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-text-muted mb-1.5">
+                  <label className="block text-caption font-semibold text-text-muted mb-1.5">
                     <MessageSquare size={9} className="inline mr-1" />
                     {t('payment_reject_reason_label')}
                   </label>
@@ -397,18 +396,18 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
                     onChange={e => setRejectReason(e.target.value)}
                     placeholder={t('payment_reject_reason_placeholder')}
                     rows={3}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2 text-sm outline-none focus:border-red-500/50 resize-none text-text-primary placeholder:text-text-muted"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2 text-body outline-none focus:border-red-500/50 resize-none text-text-primary placeholder:text-text-muted"
                   />
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => setRejectTarget(null)}
-                    className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted font-bold text-sm">
+                    className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted font-bold text-body">
                     {t('btn_cancel')}
                   </button>
                   <button
                     onClick={handleReject}
                     disabled={processingId === rejectTarget.id}
-                    className="flex-1 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    className="flex-1 h-10 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-body disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
                     <XCircle size={14} /> {t('payment_reject_btn')}
                   </button>
@@ -433,24 +432,24 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
                 <RotateCcw size={24} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-text-primary">{t('payment_undo_btn')}</h3>
-                <p className="text-sm text-text-muted mt-1">{t('payment_undo_confirm')}</p>
+                <h3 className="text-title font-bold text-text-primary">{t('payment_undo_btn')}</h3>
+                <p className="text-body text-text-muted mt-1">{t('payment_undo_confirm')}</p>
                 {undoTarget.status === 'approved' && (
-                  <p className="text-[10px] text-orange-400 mt-1 font-semibold">
+                  <p className="text-tiny text-orange-400 mt-1 font-semibold">
                     ⚠ {t('payment_undo_warning')}
                   </p>
                 )}
-                <p className="text-xs text-text-muted mt-1">{undoTarget.user_email}</p>
+                <p className="text-sub text-text-muted mt-1">{undoTarget.user_email}</p>
               </div>
               <div className="flex gap-2">
                 <button onClick={() => setUndoTarget(null)}
-                  className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted font-bold text-sm">
+                  className="flex-1 h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-text-muted font-bold text-body">
                   {t('btn_cancel')}
                 </button>
                 <button
                   onClick={() => handleUndo(undoTarget)}
                   disabled={processingId === undoTarget.id}
-                  className="flex-1 h-10 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm disabled:opacity-50"
+                  className="flex-1 h-10 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-body disabled:opacity-50"
                 >
                   {t('payment_undo_btn')}
                 </button>
@@ -475,8 +474,8 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
             >
               <div className="px-4 py-3 border-b border-[var(--border-color)] flex items-center justify-between">
                 <div>
-                  <span className="text-[12px] font-semibold text-text-primary">{t('payment_screenshot_label')}</span>
-                  <p className="text-[9px] text-text-muted mt-0.5 truncate max-w-[200px]">{screenshotTarget.user_email}</p>
+                  <span className="text-sub font-semibold text-text-primary">{t('payment_screenshot_label')}</span>
+                  <p className="text-tiny text-text-muted mt-0.5 truncate max-w-[200px]">{screenshotTarget.user_email}</p>
                 </div>
                 <button onClick={() => { setScreenshotTarget(null); setScreenshotUrl(null); }}
                   className="text-text-muted hover:text-text-primary">
@@ -487,12 +486,12 @@ export const AdminPaymentManage: React.FC<AdminPaymentManageProps> = ({ onToast,
                 {screenshotLoading ? (
                   <div className="flex flex-col items-center gap-3 text-text-muted">
                     <RefreshCw size={24} className="animate-spin" />
-                    <p className="text-[10px] font-bold">{t('admin_loading')}</p>
+                    <p className="text-tiny font-bold">{t('admin_loading')}</p>
                   </div>
                 ) : screenshotUrl ? (
                   <img src={screenshotUrl} alt="Payment screenshot" className="max-w-full rounded-xl shadow-lg" />
                 ) : (
-                  <p className="text-[11px] text-red-400 font-bold">Failed to load screenshot.</p>
+                  <p className="text-caption text-red-400 font-bold">Failed to load screenshot.</p>
                 )}
               </div>
             </motion.div>

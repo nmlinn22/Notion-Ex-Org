@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* ── Font Size Scale ──────────────────────────────────────────
+   သုံးနည်း (Tailwind class):
+     text-title    → 14px  Title / Group heading
+     text-body     → 12px  Body / Main text
+     text-sub      → 10px  Sub label
+     text-caption  → 8px   Caption / Badge text
+     text-tiny     → 8px   Tiny tag / uppercase
+──────────────────────────────────────────────────────────── */
+@theme {
+  --font-size-title: 14px;
+  --font-size-body: 12px;
+  --font-size-sub: 10px;
+  --font-size-caption: 8px;
+  --font-size-tiny: 8px;
+}
+
 :root {
   --bg-main: #0f0f0f;
   --bg-card: #1a1a1a;
@@ -29,7 +45,7 @@
 body {
   margin: 0;
   font-family: 'Noto Sans', 'Noto Sans Myanmar', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 15px;
+  font-size: 12px;
   line-height: 1.6;
   background-color: var(--bg-main);
   color: var(--text-primary);
@@ -37,7 +53,8 @@ body {
 }
 
 /* Myanmar text slightly larger for readability */
-:lang(my), .mm-text {
+:lang(my),
+.mm-text {
   font-size: 1.05em;
   line-height: 1.8;
 }
@@ -45,9 +62,11 @@ body {
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #444;
   border-radius: 2px;

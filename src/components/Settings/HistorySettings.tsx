@@ -91,7 +91,7 @@ export const HistorySettings: React.FC<HistorySettingsProps> = ({
             placeholder={t('history_search_placeholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[#7c6aff]/50 transition-all"
+            className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl pl-10 pr-4 py-2.5 text-body outline-none focus:border-[#7c6aff]/50 transition-all"
           />
         </div>
 
@@ -100,7 +100,7 @@ export const HistorySettings: React.FC<HistorySettingsProps> = ({
             <div className="relative">
               <button
                 onClick={() => setShowSortMenu(!showSortMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] text-[11px] font-bold hover:bg-[var(--bg-hover)] transition-all"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)] text-caption font-bold hover:bg-[var(--bg-hover)] transition-all"
               >
                 <Filter size={14} />
                 {t('history_sort_prefix')} {sortType === 'newest' ? t('history_sort_newest') : sortType === 'day' ? t('history_sort_day') : sortType === 'month' ? t('history_sort_month') : t('history_sort_year')}
@@ -121,7 +121,7 @@ export const HistorySettings: React.FC<HistorySettingsProps> = ({
                         <button
                           key={type}
                           onClick={() => { setSortType(type); setShowSortMenu(false); }}
-                          className={`w-full text-left px-3 py-2 text-[11px] hover:bg-[var(--bg-input)] transition-colors ${sortType === type ? 'text-[#7c6aff] font-bold' : 'text-text-muted'}`}
+                          className={`w-full text-left px-3 py-2 text-caption hover:bg-[var(--bg-input)] transition-colors ${sortType === type ? 'text-[#7c6aff] font-bold' : 'text-text-muted'}`}
                         >
                           {type === 'newest' ? t('history_sort_newest') : type === 'day' ? t('history_sort_day') : type === 'month' ? t('history_sort_month') : t('history_sort_year')}
                         </button>
@@ -135,7 +135,7 @@ export const HistorySettings: React.FC<HistorySettingsProps> = ({
             {selectedIds.length > 0 && (
               <button
                 onClick={handleBulkDelete}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-bold hover:bg-red-500 hover:text-white transition-all"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-caption font-bold hover:bg-red-500 hover:text-white transition-all"
               >
                 <Trash2 size={14} />
                 {t('history_delete_bulk_btn')} ({selectedIds.length})
@@ -146,13 +146,13 @@ export const HistorySettings: React.FC<HistorySettingsProps> = ({
           <div className="flex items-center gap-3">
             {/* Loaded / Total count */}
             {totalCount > 0 && (
-              <span className="text-[10px] text-text-muted font-medium">
+              <span className="text-tiny text-text-muted font-medium">
                 {history.length} / {totalCount}
               </span>
             )}
             <button
               onClick={toggleSelectAll}
-              className="text-[10px] font-bold text-[#7c6aff] hover:underline"
+              className="text-tiny font-bold text-[#7c6aff] hover:underline"
             >
               {selectedIds.length === filteredHistory.length ? t('history_deselect_all') : t('history_select_all')}
             </button>
@@ -161,7 +161,7 @@ export const HistorySettings: React.FC<HistorySettingsProps> = ({
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-[30px_1fr_80px_60px] gap-2 px-3 py-2 border-b border-[var(--border-color)] text-[10px] font-black text-text-muted uppercase tracking-wider">
+      <div className="grid grid-cols-[30px_1fr_80px_60px] gap-2 px-3 py-2 border-b border-[var(--border-color)] text-tiny font-black text-text-muted uppercase tracking-wider">
         <div className="flex justify-center">
           <button onClick={toggleSelectAll}>
             {selectedIds.length === filteredHistory.length && filteredHistory.length > 0
@@ -185,11 +185,10 @@ export const HistorySettings: React.FC<HistorySettingsProps> = ({
             <div
               key={entry.id}
               onClick={() => toggleSelect(entry.id as number)}
-              className={`grid grid-cols-[30px_1fr_80px_60px] gap-2 px-3 py-3 rounded-xl border transition-all cursor-pointer group ${
-                isSelected
+              className={`grid grid-cols-[30px_1fr_80px_60px] gap-2 px-3 py-3 rounded-xl border transition-all cursor-pointer group ${isSelected
                   ? 'bg-[#7c6aff]/5 border-[#7c6aff]/30'
                   : 'bg-[var(--bg-input)] border-transparent hover:border-[var(--border-color)]'
-              }`}
+                }`}
             >
               <div className="flex justify-center items-center">
                 {isSelected
@@ -197,23 +196,23 @@ export const HistorySettings: React.FC<HistorySettingsProps> = ({
                   : <Square size={14} className="text-text-muted group-hover:text-text-primary" />}
               </div>
               <div className="min-w-0">
-                <div className="text-xs font-bold truncate text-text-primary">{entry.item}</div>
-                <div className="text-[9px] text-text-muted mt-0.5">{entry.date}</div>
+                <div className="text-sub font-bold truncate text-text-primary">{entry.item}</div>
+                <div className="text-tiny text-text-muted mt-0.5">{entry.date}</div>
               </div>
               <div className="text-right flex flex-col justify-center">
-                <span className="text-[9px] bg-[var(--bg-card)] px-1.5 py-0.5 rounded border border-[var(--border-color)] text-text-secondary truncate">
+                <span className="text-tiny bg-[var(--bg-card)] px-1.5 py-0.5 rounded border border-[var(--border-color)] text-text-secondary truncate">
                   {entry.category}
                 </span>
               </div>
               <div className="text-right flex flex-col justify-center">
-                <div className={`font-mono text-[11px] font-black ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
+                <div className={`font-mono text-caption font-black ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
                   {isIncome ? '+' : '-'}{amount?.toLocaleString()}
                 </div>
               </div>
             </div>
           );
         }) : (
-          <div className="text-center py-10 text-text-muted text-xs italic">{t('history_empty')}</div>
+          <div className="text-center py-10 text-text-muted text-sub italic">{t('history_empty')}</div>
         )}
 
         {/* Load More Button — hidden in search mode (results already fully loaded) */}
@@ -222,7 +221,7 @@ export const HistorySettings: React.FC<HistorySettingsProps> = ({
             <button
               onClick={onLoadMore}
               disabled={isLoadingMore}
-              className="w-full h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-[11px] font-bold text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/40 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full h-10 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-caption font-bold text-text-muted hover:text-[#a78bfa] hover:border-[#7c6aff]/40 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isLoadingMore
                 ? <><Loader2 size={14} className="animate-spin" /> {t('loading')}</>

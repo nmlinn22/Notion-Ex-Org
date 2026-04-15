@@ -6,6 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import cron from "node-cron";
 
 dotenv.config();
 
@@ -71,7 +72,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
   console.error("Please ensure you have added both VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your Vercel Environment Variables.");
 }
 
-const supabase = (supabaseUrl && supabaseServiceKey) 
+const supabase = (supabaseUrl && supabaseServiceKey)
   ? createClient(supabaseUrl, supabaseServiceKey)
   : null as any;
 
@@ -219,7 +220,7 @@ ${JSON.stringify(entries.map((e: any, idx: number) => ({ idx, item: e.item, cate
 app.post("/api/parse", authenticateUser, async (req: any, res) => {
   const { text, image, groups, categories } = req.body;
   const user = req.user;
-  
+
   try {
     // Fetch Gemini Key from settings
     const { data: settings } = await supabase
@@ -231,14 +232,14 @@ app.post("/api/parse", authenticateUser, async (req: any, res) => {
     const apiKey = settings?.gemini_key || process.env.GEMINI_API_KEY;
 
     if (!apiKey || apiKey.length < 10) {
-      return res.status(400).json({ 
-        error: "Gemini API Key မရှိပါ။ Settings မှာ အရင်ထည့်ပေးပါ။" 
+      return res.status(400).json({
+        error: "Gemini API Key မရှိပါ။ Settings မှာ အရင်ထည့်ပေးပါ။"
       });
     }
 
     const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
     const model = "gemini-2.5-flash";
-    
+
     const groupList = groups && groups.length > 0 ? groups.join(" | ") : "30% Needs | 10% Wants | 50% Saving | 10% Health | Income";
     const categoryList = categories && categories.length > 0 ? categories.join(" | ") : "Foods & Drink | Medicine | Internet Bill | Transportation | Bank Service Fees | Household items | Personal Use | Gaming | Mobile Accessories | Cloth | Cosmetic | Parent Support | Investment | Debit Repayment | Salary | Others | Balance | Freelance | Loan";
 
@@ -307,9 +308,9 @@ Rules:
         });
         break;
       } catch (err: any) {
-        const isRetryable = 
-          err.message?.includes("503") || 
-          err.message?.includes("UNAVAILABLE") || 
+        const isRetryable =
+          err.message?.includes("503") ||
+          err.message?.includes("UNAVAILABLE") ||
           err.message?.includes("high demand") ||
           err.message?.includes("overloaded");
 
@@ -354,69 +355,69 @@ app.post("/api/notion", authenticateUser, async (req: any, res) => {
     const results = [];
 
     for (const entry of entries) {
-    try {
-      // 1. Send to Notion FIRST
-      const properties: any = {
-        Date: { date: { start: entry.date } },
-        Item: { title: [{ text: { content: entry.item || "" } }] },
-        Group: { select: { name: entry.group } },
-        Category: { select: { name: entry.category } }
-      };
+      try {
+        // 1. Send to Notion FIRST
+        const properties: any = {
+          Date: { date: { start: entry.date } },
+          Item: { title: [{ text: { content: entry.item || "" } }] },
+          Group: { select: { name: entry.group } },
+          Category: { select: { name: entry.category } }
+        };
 
-      if (entry.income) properties.Income = { number: entry.income };
-      if (entry.expense) properties.Expense = { number: entry.expense };
+        if (entry.income) properties.Income = { number: entry.income };
+        if (entry.expense) properties.Expense = { number: entry.expense };
 
-      const notionRes = await fetch("https://api.notion.com/v1/pages", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "Notion-Version": "2022-06-28"
-        },
-        body: JSON.stringify({ parent: { database_id: dbId }, properties })
-      });
-
-      const data = await notionRes.json() as any;
-      if (!notionRes.ok) {
-        console.error("Notion API Error:", JSON.stringify(data));
-
-        // Notion error code ကို ကြည့်ပြီး ရှင်းရှင်းလင်းလင်း error ပြပါ
-        const notionCode = data.code || '';
-        const notionStatus = notionRes.status;
-
-        if (notionStatus === 401 || notionCode === 'unauthorized') {
-          throw new Error('NOTION_INVALID_KEY');
-        } else if (notionStatus === 404 || notionCode === 'object_not_found') {
-          throw new Error('NOTION_DB_NOT_FOUND');
-        } else if (notionCode === 'validation_error') {
-          throw new Error('NOTION_VALIDATION_ERROR: ' + (data.message || ''));
-        } else if (notionCode === 'restricted_resource') {
-          throw new Error('NOTION_NO_ACCESS');
-        } else {
-          throw new Error(data.message || 'Notion API error');
-        }
-      }
-
-      // 2. Save to Supabase ONLY IF Notion was successful
-      const { error: dbError } = await supabase
-        .from('history')
-        .insert({
-          user_id: user.id,
-          date: entry.date,
-          item: entry.item,
-          income: entry.income || null,
-          expense: entry.expense || null,
-          category: entry.category,
-          group_name: entry.group
+        const notionRes = await fetch("https://api.notion.com/v1/pages", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28"
+          },
+          body: JSON.stringify({ parent: { database_id: dbId }, properties })
         });
 
-      if (dbError) throw dbError;
+        const data = await notionRes.json() as any;
+        if (!notionRes.ok) {
+          console.error("Notion API Error:", JSON.stringify(data));
 
-      results.push({ success: true, id: data.id });
-    } catch (err: any) {
-      results.push({ success: false, error: translateServerError(err.message), entry });
+          // Notion error code ကို ကြည့်ပြီး ရှင်းရှင်းလင်းလင်း error ပြပါ
+          const notionCode = data.code || '';
+          const notionStatus = notionRes.status;
+
+          if (notionStatus === 401 || notionCode === 'unauthorized') {
+            throw new Error('NOTION_INVALID_KEY');
+          } else if (notionStatus === 404 || notionCode === 'object_not_found') {
+            throw new Error('NOTION_DB_NOT_FOUND');
+          } else if (notionCode === 'validation_error') {
+            throw new Error('NOTION_VALIDATION_ERROR: ' + (data.message || ''));
+          } else if (notionCode === 'restricted_resource') {
+            throw new Error('NOTION_NO_ACCESS');
+          } else {
+            throw new Error(data.message || 'Notion API error');
+          }
+        }
+
+        // 2. Save to Supabase ONLY IF Notion was successful
+        const { error: dbError } = await supabase
+          .from('history')
+          .insert({
+            user_id: user.id,
+            date: entry.date,
+            item: entry.item,
+            income: entry.income || null,
+            expense: entry.expense || null,
+            category: entry.category,
+            group_name: entry.group
+          });
+
+        if (dbError) throw dbError;
+
+        results.push({ success: true, id: data.id });
+      } catch (err: any) {
+        results.push({ success: false, error: translateServerError(err.message), entry });
+      }
     }
-  }
 
     res.json({ results });
   } catch (err: any) {
@@ -491,15 +492,15 @@ app.post("/api/admin/set-role", authenticateUser, async (req: any, res) => {
     return res.status(400).json({ error: "သင်ကိုယ်တိုင် role ပြောင်း၍ မရပါ။" });
   }
 
-  const updateData: any = { 
-    role, 
-    is_admin: role === 'admin' 
+  const updateData: any = {
+    role,
+    is_admin: role === 'admin'
   };
 
   // If setting to member, clear premium expiry
   if (role === 'member') {
     updateData.premium_expires_at = null;
-  } 
+  }
   // If setting to premium, ensure they have an active expiry (default 30 days if none/expired)
   else if (role === 'premium') {
     const { data: profile } = await supabase
@@ -507,10 +508,10 @@ app.post("/api/admin/set-role", authenticateUser, async (req: any, res) => {
       .select('premium_expires_at')
       .eq('id', userId)
       .single();
-    
+
     const now = new Date();
     const currentExpiry = profile?.premium_expires_at ? new Date(profile.premium_expires_at) : null;
-    
+
     if (!currentExpiry || currentExpiry < now) {
       const defaultExpiry = new Date();
       defaultExpiry.setDate(defaultExpiry.getDate() + 30);
@@ -1005,18 +1006,18 @@ app.get("/api/profile/me", authenticateUser, async (req: any, res) => {
 });
 
 app.get("/api/health", (req, res) => {
-  res.json({ 
-    status: "ok", 
+  res.json({
+    status: "ok",
     environment: process.env.VERCEL ? "vercel" : "local",
-    supabaseConfigured: !!supabase 
+    supabaseConfigured: !!supabase
   });
 });
 
 // Global Error Handler
 app.use((err: any, req: any, res: any, next: any) => {
   console.error("[GLOBAL ERROR]:", err);
-  res.status(500).json({ 
-    error: "Internal Server Error", 
+  res.status(500).json({
+    error: "Internal Server Error",
     message: err.message || "An unexpected error occurred"
   });
 });
@@ -1067,6 +1068,7 @@ app.post("/api/auto-payments/run", authenticateUser, async (req: any, res) => {
   try {
     const now = new Date();
     const todayDay = now.getDate();
+    const todayDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
     const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
     const { data: payments, error } = await supabase
@@ -1077,12 +1079,13 @@ app.post("/api/auto-payments/run", authenticateUser, async (req: any, res) => {
     const triggered: string[] = [];
 
     for (const p of payments || []) {
-      // Skip if already run this month
-      if (p.last_run === thisMonth) continue;
-      // Skip if today hasn't reached the scheduled day yet
-      if (todayDay < p.day_of_month) continue;
+      // Skip if already run today
+      if (p.last_run === todayDate) continue;
 
-      // Insert entry
+      // Only trigger if today's date matches the scheduled day of month
+      if (todayDay !== p.day_of_month) continue;
+
+      // Insert entry with EXACT scheduled date (using day_of_month)
       const entryData: any = {
         user_id: req.user.id,
         date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(p.day_of_month).padStart(2, '0')}`,
@@ -1095,8 +1098,8 @@ app.post("/api/auto-payments/run", authenticateUser, async (req: any, res) => {
 
       const { error: insertError } = await supabase.from("entries").insert(entryData);
       if (!insertError) {
-        // Update last_run
-        await supabase.from("auto_payments").update({ last_run: thisMonth }).eq("id", p.id);
+        // Update last_run with today's date (YYYY-MM-DD format for better tracking)
+        await supabase.from("auto_payments").update({ last_run: todayDate }).eq("id", p.id);
         triggered.push(p.item);
       }
     }
@@ -1266,11 +1269,11 @@ if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   const clientPath = path.join(__dirname, "client");
   const fallbackPath = path.join(__dirname, "dist", "client");
   const fallbackPath2 = path.join(__dirname, "..", "dist", "client");
-  
+
   let staticPath = clientPath;
   if (!fs.existsSync(staticPath)) staticPath = fallbackPath;
   if (!fs.existsSync(staticPath)) staticPath = fallbackPath2;
-  
+
   if (fs.existsSync(staticPath)) {
     app.use(express.static(staticPath));
     app.get("*", (req, res, next) => {
@@ -1280,11 +1283,70 @@ if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   }
 }
 
+// ── AUTO PAYMENT CRON JOB ─────────────────────────────────────────────────────
+// Helper function to process auto payments for all users
+const processAutoPaymentsForAllUsers = async () => {
+  try {
+    const now = new Date();
+    const todayDay = now.getDate();
+    const todayDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
+
+    // Get all active auto payments that match today's day
+    const { data: payments, error: fetchError } = await supabase
+      .from("auto_payments")
+      .select("*")
+      .eq("active", true)
+      .eq("day_of_month", todayDay);
+
+    if (fetchError) {
+      console.error("[CRON] Error fetching auto payments:", fetchError);
+      return;
+    }
+
+    let addedCount = 0;
+
+    for (const p of payments || []) {
+      // Skip if already run today
+      if (p.last_run === todayDate) continue;
+
+      // Insert entry with exact scheduled date
+      const entryData: any = {
+        user_id: p.user_id,
+        date: todayDate,
+        item: p.item,
+        income: p.type === 'income' ? p.amount : 0,
+        expense: p.type === 'expense' ? p.amount : 0,
+        category: p.category || '',
+        group: p.group || '',
+      };
+
+      const { error: insertError } = await supabase.from("entries").insert(entryData);
+      if (!insertError) {
+        await supabase.from("auto_payments").update({ last_run: todayDate }).eq("id", p.id);
+        addedCount++;
+      }
+    }
+
+    if (addedCount > 0) {
+      console.log(`[CRON] Auto-payments: Added ${addedCount} entries for ${todayDate}`);
+    }
+  } catch (err: any) {
+    console.error("[CRON] Error processing auto payments:", err.message);
+  }
+};
+
+// Schedule cron job to run every day at 00:05 AM
+cron.schedule('5 0 * * *', () => {
+  console.log('[CRON] Running auto-payment check...');
+  processAutoPaymentsForAllUsers();
+});
+
 // Only listen if not running as a serverless function (e.g., on Vercel)
 if (!process.env.VERCEL) {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`[SERVER] Started successfully on port ${PORT}`);
     console.log(`[SERVER] Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`[SERVER] Auto-payments cron job initialized (runs daily at 00:05)`);
   });
 }
 export default app;

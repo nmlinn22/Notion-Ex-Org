@@ -44,8 +44,8 @@ export const getLang = (): Lang => (localStorage.getItem('app_lang') as Lang) ||
 export const ts = (key: StringKey, vars?: Record<string, string | number>): string => {
   const lang = getLang();
   const langStrings = strings[lang] as Record<string, string>;
-    const enStrings = strings['en'] as Record<string, string>;
-    let str: string = langStrings[key] ?? enStrings[key] ?? key;
+  const enStrings = strings['en'] as Record<string, string>;
+  let str: string = langStrings[key] ?? enStrings[key] ?? key;
   if (vars) {
     Object.entries(vars).forEach(([k, v]) => {
       str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));

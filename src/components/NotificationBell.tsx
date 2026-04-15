@@ -11,7 +11,7 @@ interface NotificationBellProps {
 
 export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) => {
   const { t } = useLanguage();
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(session);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications(session);
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownTop, setDropdownTop] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -64,7 +64,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-lg animate-pulse">
+          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-tiny font-black rounded-full flex items-center justify-center shadow-lg animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -79,7 +79,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             className="fixed right-3 mt-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-[200] overflow-hidden"
             style={{
-              width: 'min(320px, calc(100vw - 24px))',
+              width: 'min(270px, calc(100vw - 24px))',
               top: dropdownTop,
             }}
           >
@@ -89,15 +89,18 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
             />
 
             <div className="px-4 py-3 border-b border-[var(--border-color)] flex items-center justify-between bg-[var(--bg-input)]/50">
-              <h3 className="text-sm font-bold text-text-primary">{t('notification_title')}</h3>
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="text-xs font-semibold text-[#a78bfa] hover:underline"
-                >
-                  {t('notification_mark_all')}
-                </button>
-              )}
+              <h3 className="text-body font-bold text-text-primary">{t('notification_title')}</h3>
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-caption font-semibold text-[#a78bfa] hover:underline"
+                  >
+                    {t('notification_mark_all')}
+                  </button>
+                )}
+                <button onClick={() => setIsOpen(false)} className="ml-1 p-1 rounded hover:bg-[var(--bg-hover)] text-text-muted" title="Close"><X size={16} /></button>
+              </div>
             </div>
 
             <div className="max-h-[60vh] overflow-y-auto">
@@ -106,49 +109,51 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
                   <div className="w-12 h-12 rounded-full bg-[var(--bg-input)] flex items-center justify-center mx-auto mb-3">
                     <Bell size={20} className="text-text-muted/30" />
                   </div>
-                  <p className="text-sm text-text-muted">{t('notification_empty')}</p>
+                  <p className="text-body text-text-muted">{t('notification_empty')}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-[var(--border-color)]">
                   {notifications.map((noti) => {
                     const isExpanded = expandedId === noti.id;
                     return (
-                    <div
-                      key={noti.id}
-                      onClick={() => {
-                        setExpandedId(isExpanded ? null : noti.id);
-                        if (!noti.is_read) markAsRead(noti.id);
-                      }}
-                      className={`p-4 transition-colors cursor-pointer hover:bg-[var(--bg-hover)] ${!noti.is_read ? 'bg-[#7c6aff]/5' : ''}`}
-                    >
-                      <div className="flex gap-3">
-                        <div className="mt-0.5 shrink-0">
-                          {getIcon(noti.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <p className={`text-xs font-semibold ${!noti.is_read ? 'text-text-primary' : 'text-text-muted'}`}>
-                              {noti.title}
-                            </p>
-                            <span className="text-[10px] text-text-muted shrink-0">{getTimeAgo(noti.created_at)}</span>
+                      <div
+                        key={noti.id}
+                        className={`group p-4 transition-colors cursor-pointer hover:bg-[var(--bg-hover)] ${!noti.is_read ? 'bg-[#7c6aff]/5' : ''}`}
+                        onClick={() => {
+                          setExpandedId(isExpanded ? null : noti.id);
+                          if (!noti.is_read) markAsRead(noti.id);
+                        }}
+                      >
+                        <div className="flex gap-3 items-start">
+                          <div className="mt-0.5 shrink-0">{getIcon(noti.type)}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <p className={`text-caption font-semibold ${!noti.is_read ? 'text-text-primary' : 'text-text-muted'}`}>{noti.title}</p>
+                              <span className="text-tiny text-text-muted shrink-0">{getTimeAgo(noti.created_at)}</span>
+                            </div>
+                            <motion.p
+                              animate={{ height: 'auto' }}
+                              className={`text-caption text-text-secondary leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}
+                            >
+                              {noti.message}
+                            </motion.p>
+                            {!isExpanded && noti.message.length > 80 && (
+                              <p className="text-tiny text-[#a78bfa] mt-1 font-semibold">{t('notification_tap_to_read')}</p>
+                            )}
                           </div>
-                          <motion.p
-                            animate={{ height: 'auto' }}
-                            className={`text-xs text-text-secondary leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}
+                          <button
+                            className="ml-2 p-1 rounded hover:bg-red-50 text-red-400 opacity-70 hover:opacity-100 transition-opacity"
+                            title={t('notification_delete')}
+                            onClick={e => {
+                              e.stopPropagation();
+                              deleteNotification(noti.id);
+                            }}
                           >
-                            {noti.message}
-                          </motion.p>
-                          {!isExpanded && noti.message.length > 80 && (
-                            <p className="text-[10px] text-[#a78bfa] mt-1 font-semibold">
-                              {t('notification_tap_to_read')}
-                            </p>
-                          )}
+                            <Trash2 size={16} />
+                          </button>
+                          {!noti.is_read && <div className="w-2 h-2 rounded-full bg-[#7c6aff] mt-1 shrink-0" />}
                         </div>
-                        {!noti.is_read && (
-                          <div className="w-2 h-2 rounded-full bg-[#7c6aff] mt-1 shrink-0" />
-                        )}
                       </div>
-                    </div>
                     );
                   })}
                 </div>
@@ -156,7 +161,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
             </div>
 
             <div className="px-4 py-2 bg-[var(--bg-input)]/30 border-t border-[var(--border-color)] text-center">
-              <p className="text-[10px] text-text-muted">{t('notification_recent')}</p>
+              <p className="text-tiny text-text-muted">{t('notification_recent')}</p>
             </div>
           </motion.div>
         )}

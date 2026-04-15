@@ -54,9 +54,9 @@ export const InputCard: React.FC<InputCardProps> = ({
   const isPremium = userRole === 'premium' || userRole === 'admin';
 
   const tabs = [
-    { id: 'text' as const,  icon: <Type size={12} />,          label: t('tab_text'),  accent: '#7c6aff',  isPremiumOnly: false },
-    { id: 'image' as const, icon: <ScanLine size={12} />,      label: t('tab_scan'),  accent: '#7c6aff',  isPremiumOnly: true  },
-    { id: 'csv' as const,   icon: <FileSpreadsheet size={12} />, label: t('tab_file'), accent: '#34d399', isPremiumOnly: true  },
+    { id: 'text' as const, icon: <Type size={12} />, label: t('tab_text'), accent: '#7c6aff', isPremiumOnly: false },
+    { id: 'image' as const, icon: <ScanLine size={12} />, label: t('tab_scan'), accent: '#7c6aff', isPremiumOnly: true },
+    { id: 'csv' as const, icon: <FileSpreadsheet size={12} />, label: t('tab_file'), accent: '#34d399', isPremiumOnly: true },
   ];
 
   return (
@@ -74,7 +74,7 @@ export const InputCard: React.FC<InputCardProps> = ({
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between gap-2 mb-3">
           {/* Welcome badge */}
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7c6aff]/10 border border-[#7c6aff]/20 text-[11px] font-bold text-[#a78bfa] tracking-tight">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7c6aff]/10 border border-[#7c6aff]/20 text-caption font-bold text-[#a78bfa] tracking-tight">
             <Sparkles size={10} className="opacity-70" />
             {t('input_welcome')}
           </span>
@@ -88,7 +88,7 @@ export const InputCard: React.FC<InputCardProps> = ({
                 exit={{ opacity: 0, scale: 0.8, x: 8 }}
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#7c6aff]/8 border border-[#7c6aff]/20"
               >
-                <span className="text-[10px] font-bold text-[#a78bfa]">{t('input_listening')}</span>
+                <span className="text-tiny font-bold text-[#a78bfa]">{t('input_listening')}</span>
                 <VoiceWave />
               </motion.div>
             )}
@@ -107,11 +107,10 @@ export const InputCard: React.FC<InputCardProps> = ({
                   if (isPremiumTab) { setActiveTab(tab.id); return; }
                   setActiveTab(tab.id);
                 }}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-[7px] rounded-[11px] text-[11px] font-bold transition-all duration-200 ${
-                  isActive
-                    ? 'bg-[var(--bg-card)] shadow-sm'
-                    : 'hover:bg-[var(--bg-card)]/50'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-[7px] rounded-[11px] text-caption font-bold transition-all duration-200 ${isActive
+                  ? 'bg-[var(--bg-card)] shadow-sm'
+                  : 'hover:bg-[var(--bg-card)]/50'
+                  }`}
                 style={{
                   color: isActive
                     ? tab.accent
@@ -140,8 +139,8 @@ export const InputCard: React.FC<InputCardProps> = ({
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={t('input_placeholder')}
-                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-sm leading-relaxed min-h-[140px] outline-none focus:border-[#7c6aff]/40 transition-all resize-none placeholder:text-text-muted"
-                style={{ fontSize: '13.5px' }}
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-body leading-relaxed min-h-[140px] outline-none focus:border-[#7c6aff]/40 transition-all resize-none placeholder:text-text-muted"
+                style={{ fontSize: '12px' }}
               />
             </motion.div>
           )}
@@ -155,19 +154,19 @@ export const InputCard: React.FC<InputCardProps> = ({
                     <ImageIcon size={20} className="text-text-secondary" />
                   </div>
                   <div className="text-center">
-                    <p className="text-xs font-bold text-text-primary">{t('input_upload_prompt')}</p>
-                    <p className="text-[10px] mt-0.5 text-text-muted">{t('input_upload_hint')}</p>
+                    <p className="text-sub font-bold text-text-primary">{t('input_upload_prompt')}</p>
+                    <p className="text-tiny mt-0.5 text-text-muted">{t('input_upload_hint')}</p>
                   </div>
                   <div className="flex gap-3 w-full">
                     <button
                       onClick={() => onOpenPremium?.()}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-xs font-bold text-text-primary hover:border-[#7c6aff]/40 hover:bg-[#7c6aff]/5 hover:text-[#a78bfa] transition-all"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-sub font-bold text-text-primary hover:border-[#7c6aff]/40 hover:bg-[#7c6aff]/5 hover:text-[#a78bfa] transition-all"
                     >
                       <ImageIcon size={14} /><span>{t('input_gallery_btn')}</span><Crown size={13} style={{ color: '#f59e0b', filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                     </button>
                     <button
                       onClick={() => onOpenPremium?.()}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-xs font-bold text-text-primary hover:border-[#34d399]/40 hover:bg-[#34d399]/5 hover:text-[#34d399] transition-all"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-sub font-bold text-text-primary hover:border-[#34d399]/40 hover:bg-[#34d399]/5 hover:text-[#34d399] transition-all"
                     >
                       <Camera size={14} /><span>{t('input_camera_btn')}</span><Crown size={13} style={{ color: '#f59e0b', filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                     </button>
@@ -189,16 +188,16 @@ export const InputCard: React.FC<InputCardProps> = ({
                     <ImageIcon size={20} className="text-text-secondary" />
                   </div>
                   <div className="text-center">
-                    <p className="text-xs font-bold text-text-primary">{t('input_upload_prompt')}</p>
-                    <p className="text-[10px] mt-0.5 text-text-muted">{t('input_upload_hint')}</p>
+                    <p className="text-sub font-bold text-text-primary">{t('input_upload_prompt')}</p>
+                    <p className="text-tiny mt-0.5 text-text-muted">{t('input_upload_hint')}</p>
                   </div>
                   <div className="flex gap-3 w-full">
-                    <label className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-xs font-bold text-text-primary hover:border-[#7c6aff]/40 hover:bg-[#7c6aff]/5 hover:text-[#a78bfa] transition-all cursor-pointer">
+                    <label className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-sub font-bold text-text-primary hover:border-[#7c6aff]/40 hover:bg-[#7c6aff]/5 hover:text-[#a78bfa] transition-all cursor-pointer">
                       <ImageIcon size={14} />
                       <span>{t('input_gallery_btn')}</span>
                       <input type="file" accept="image/*" onChange={(e) => { handleImageChange(e); }} className="hidden" ref={fileInputRef} />
                     </label>
-                    <label className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-xs font-bold text-text-primary hover:border-[#34d399]/40 hover:bg-[#34d399]/5 hover:text-[#34d399] transition-all cursor-pointer">
+                    <label className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[12px] bg-[var(--bg-card)] border border-[var(--border-color)] text-sub font-bold text-text-primary hover:border-[#34d399]/40 hover:bg-[#34d399]/5 hover:text-[#34d399] transition-all cursor-pointer">
                       <Camera size={14} />
                       <span>{t('input_camera_btn')}</span>
                       <input type="file" accept="image/*" capture="environment" onChange={(e) => { handleImageChange(e); }} className="hidden" ref={cameraInputRef} />
@@ -323,7 +322,7 @@ export const InputCard: React.FC<InputCardProps> = ({
               ? <Loader2 size={14} className="animate-spin" />
               : <Sparkles size={14} />
             }
-            <span className="text-[11px] font-bold tracking-wide">{t('input_parse_btn')}</span>
+            <span className="text-caption font-bold tracking-wide">{t('input_parse_btn')}</span>
           </button>
         </div>
       )}

@@ -20,7 +20,7 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ isOpen, onClose, title, 
               <div className="space-y-2">
                 <h3 className="text-xl font-bold text-text-primary">{title || t('error_occurred')}</h3>
                 <div className="max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
-                  <p className="text-sm text-text-muted leading-relaxed break-words">{message}</p>
+                  <p className="text-body text-text-muted leading-relaxed break-words">{message}</p>
                 </div>
               </div>
               <div className="w-full pt-2">

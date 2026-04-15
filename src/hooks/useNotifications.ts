@@ -90,11 +90,23 @@ export function useNotifications(session: Session | null) {
     };
   }, [session?.user?.id, fetchNotifications]);
 
+  const deleteNotification = async (id: string) => {
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('id', id);
+    if (!error) {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      setUnreadCount(prev => prev - 1 < 0 ? 0 : prev - (notifications.find(n => n.id === id && !n.is_read) ? 1 : 0));
+    }
+  };
+
   return {
     notifications,
     unreadCount,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
     refresh: fetchNotifications
   };
 }

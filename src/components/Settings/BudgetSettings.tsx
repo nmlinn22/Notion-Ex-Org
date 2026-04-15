@@ -89,7 +89,7 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
       <div className="flex gap-2">
         {(['limits', 'table'] as const).map(tab => (
           <button key={tab} onClick={() => setBudgetTab(tab)}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border ${budgetTab === tab
+            className={`flex-1 py-2.5 rounded-xl text-sub font-bold transition-all border ${budgetTab === tab
               ? 'bg-[#7c6aff] text-white border-[#7c6aff] shadow-md shadow-[#7c6aff]/25'
               : 'bg-[var(--bg-card)] text-text-muted border-[var(--border-color)] hover:text-[var(--text-primary)] hover:border-[#7c6aff]/40'
               }`}>
@@ -103,13 +103,13 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
         <div className="space-y-3">
 
           {/* Section label */}
-          <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider px-1">
+          <p className="text-tiny font-bold text-text-muted uppercase tracking-wider px-1">
             {t('budget_group_limits')}
           </p>
 
           {groups.length === 0 ? (
             <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl px-4 py-8 text-center">
-              <p className="text-[11px] text-text-muted">{t('budget_no_limit')}</p>
+              <p className="text-caption text-text-muted">{t('budget_no_limit')}</p>
             </div>
           ) : (
             groups.map((g) => {
@@ -129,7 +129,7 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
                   {/* Edit mode */}
                   {isEditing ? (
                     <div className="px-4 py-4 flex items-center gap-2">
-                      <span className="text-xs font-bold text-[var(--text-primary)] shrink-0 min-w-[80px]">{g}</span>
+                      <span className="text-sub font-bold text-[var(--text-primary)] shrink-0 min-w-[80px]">{g}</span>
                       <input
                         type="number"
                         value={amount}
@@ -137,7 +137,7 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
                         placeholder={t('budget_limit_placeholder')}
                         autoFocus
                         onKeyDown={e => e.key === 'Enter' && handleSave()}
-                        className="flex-1 bg-[var(--bg-input)] border border-[#7c6aff]/40 rounded-xl px-3 py-1.5 text-xs font-mono outline-none focus:border-[#7c6aff] text-[var(--text-primary)]"
+                        className="flex-1 bg-[var(--bg-input)] border border-[#7c6aff]/40 rounded-xl px-3 py-1.5 text-sub font-mono outline-none focus:border-[#7c6aff] text-[var(--text-primary)]"
                       />
                       <button onClick={handleSave} className="p-1.5 rounded-lg bg-[#7c6aff] text-white">
                         <Check size={13} />
@@ -155,9 +155,9 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
                       {/* Card header: group name + % badge + edit btn */}
                       <div className="flex items-center justify-between px-4 pt-4 pb-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-[var(--text-primary)]">{g}</span>
+                          <span className="text-body font-bold text-[var(--text-primary)]">{g}</span>
                           {budget && (
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isOver
+                            <span className={`text-tiny font-semibold px-2 py-0.5 rounded-full ${isOver
                                 ? 'bg-[#f87171]/10 text-[#f87171]'
                                 : pct >= 75
                                   ? 'bg-[#fbbf24]/10 text-[#fbbf24]'
@@ -191,24 +191,24 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
 
                           {/* Budget row */}
                           <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-text-muted">Budget</span>
-                            <span className="text-[13px] font-mono font-semibold text-[#a78bfa]">
+                            <span className="text-caption text-text-muted">Budget</span>
+                            <span className="text-sub font-mono font-semibold text-[#a78bfa]">
                               {fmt(budget.amount)}
                             </span>
                           </div>
 
                           {/* Expense row */}
                           <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-text-muted">Expense</span>
-                            <span className={`text-[13px] font-mono font-semibold ${isOver ? 'text-[#f87171]' : 'text-[var(--text-primary)]'}`}>
+                            <span className="text-caption text-text-muted">Expense</span>
+                            <span className={`text-sub font-mono font-semibold ${isOver ? 'text-[#f87171]' : 'text-[var(--text-primary)]'}`}>
                               {fmt(spent)}
                             </span>
                           </div>
 
                           {/* Balance row */}
                           <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-text-muted">Balance</span>
-                            <span className={`text-[13px] font-mono font-bold ${isOver ? 'text-[#f87171]' : 'text-[#34d399]'}`}>
+                            <span className="text-caption text-text-muted">Balance</span>
+                            <span className={`text-sub font-mono font-bold ${isOver ? 'text-[#f87171]' : 'text-[#34d399]'}`}>
                               {isOver ? `−${fmt(Math.abs(remaining))}` : fmt(remaining)}
                             </span>
                           </div>
@@ -218,7 +218,7 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
                         /* No budget set */
                         <div className="px-4 pb-4">
                           <div className="px-3 py-2.5 bg-[var(--bg-input)]/40 border border-[var(--border-color)] rounded-xl text-center">
-                            <p className="text-[11px] text-text-muted italic">{t('budget_no_limit')}</p>
+                            <p className="text-caption text-text-muted italic">{t('budget_no_limit')}</p>
                           </div>
                         </div>
                       )}
@@ -230,7 +230,7 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
           )}
 
           {/* Help hint */}
-          <p className="text-[11px] text-text-muted text-center leading-relaxed px-2 pb-1">
+          <p className="text-caption text-text-muted text-center leading-relaxed px-2 pb-1">
             📝 {t('budget_limit_help')}
           </p>
 
@@ -241,11 +241,11 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
       {budgetTab === 'table' && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{t('budget_tab_allocation')}</p>
+            <p className="text-tiny font-bold text-text-muted uppercase tracking-wider">{t('budget_tab_allocation')}</p>
             {/* Year dropdown */}
             <div className="relative">
               <button onClick={() => setYearOpen(o => !o)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-xs font-semibold hover:border-[#7c6aff]/50 transition-all">
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-sub font-semibold hover:border-[#7c6aff]/50 transition-all">
                 {tableYear}
                 <ChevronDown size={13} className={`text-text-muted transition-transform ${yearOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -255,7 +255,7 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
                   <div className="absolute right-0 top-full mt-1 z-50 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-xl overflow-hidden min-w-[80px]">
                     {YEARS.map(y => (
                       <button key={y} onClick={() => { setTableYear(y); setYearOpen(false); }}
-                        className={`w-full px-4 py-2 text-left text-xs font-semibold transition-colors ${y === tableYear ? 'bg-[#7c6aff]/15 text-[#a78bfa]' : 'text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'}`}>
+                        className={`w-full px-4 py-2 text-left text-sub font-semibold transition-colors ${y === tableYear ? 'bg-[#7c6aff]/15 text-[#a78bfa]' : 'text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'}`}>
                         {y}
                       </button>
                     ))}
@@ -272,15 +272,15 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
           ) : (
             <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+                <table className="w-full text-sub">
                   <thead>
                     <tr className="border-b border-[var(--border-color)] bg-[var(--bg-input)]">
-                      <th className="text-left px-3 py-2.5 text-[10px] font-bold text-text-muted uppercase tracking-wider sticky left-0 bg-[var(--bg-input)] min-w-[48px]">Month</th>
-                      <th className="text-right px-3 py-2.5 text-[10px] font-bold text-[#34d399] uppercase tracking-wider min-w-[64px]">Income</th>
-                      <th className="text-right px-3 py-2.5 text-[10px] font-bold text-[#f87171] uppercase tracking-wider min-w-[64px]">Spent</th>
-                      <th className="text-right px-3 py-2.5 text-[10px] font-bold text-[#a78bfa] uppercase tracking-wider min-w-[72px]">Balance</th>
+                      <th className="text-left px-3 py-2.5 text-tiny font-bold text-text-muted uppercase tracking-wider sticky left-0 bg-[var(--bg-input)] min-w-[48px]">Month</th>
+                      <th className="text-right px-3 py-2.5 text-tiny font-bold text-[#34d399] uppercase tracking-wider min-w-[64px]">Income</th>
+                      <th className="text-right px-3 py-2.5 text-tiny font-bold text-[#f87171] uppercase tracking-wider min-w-[64px]">Spent</th>
+                      <th className="text-right px-3 py-2.5 text-tiny font-bold text-[#a78bfa] uppercase tracking-wider min-w-[72px]">Balance</th>
                       {groups.map(g => (
-                        <th key={g} className="text-right px-3 py-2.5 text-[10px] font-bold text-text-muted uppercase tracking-wider min-w-[72px] whitespace-nowrap">
+                        <th key={g} className="text-right px-3 py-2.5 text-tiny font-bold text-text-muted uppercase tracking-wider min-w-[72px] whitespace-nowrap">
                           {g}
                         </th>
                       ))}
@@ -298,7 +298,7 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
                           className={`border-b border-[var(--border-color)]/50 transition-colors ${isCurrentMonth ? 'bg-[#7c6aff]/5' : i % 2 === 0 ? '' : 'bg-[var(--bg-input)]/30'} ${hasData ? '' : 'opacity-40'}`}>
                           <td className={`px-3 py-2.5 font-bold sticky left-0 ${isCurrentMonth ? 'text-[#a78bfa] bg-[#7c6aff]/5' : 'text-[var(--text-primary)] bg-[var(--bg-card)]'}`}>
                             {row.label}
-                            {isCurrentMonth && <span className="ml-1 text-[8px] bg-[#7c6aff]/20 text-[#a78bfa] px-1 rounded">now</span>}
+                            {isCurrentMonth && <span className="ml-1 text-tiny bg-[#7c6aff]/20 text-[#a78bfa] px-1 rounded">now</span>}
                           </td>
                           <td className="px-3 py-2.5 text-right font-mono text-[#34d399] font-semibold">{hasData ? fmt(row.income) : '—'}</td>
                           <td className="px-3 py-2.5 text-right font-mono text-[#f87171] font-semibold">{hasData ? fmt(row.expense) : '—'}</td>
@@ -322,7 +322,7 @@ export const BudgetSettings: React.FC<BudgetSettingsProps> = ({
                   {/* Year total row */}
                   <tfoot>
                     <tr className="border-t-2 border-[var(--border-color)] bg-[var(--bg-input)]">
-                      <td className="px-3 py-2.5 text-[10px] font-black text-text-muted uppercase sticky left-0 bg-[var(--bg-input)]">Total</td>
+                      <td className="px-3 py-2.5 text-tiny font-black text-text-muted uppercase sticky left-0 bg-[var(--bg-input)]">Total</td>
                       <td className="px-3 py-2.5 text-right font-mono font-black text-[#34d399]">{fmt(yearIncome)}</td>
                       <td className="px-3 py-2.5 text-right font-mono font-black text-[#f87171]">{fmt(yearExpense)}</td>
                       <td className={`px-3 py-2.5 text-right font-mono font-black ${yearBalance >= 0 ? 'text-[#a78bfa]' : 'text-[#f87171]'}`}>

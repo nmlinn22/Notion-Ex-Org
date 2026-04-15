@@ -43,17 +43,17 @@ export const ParsedEntries: React.FC<ParsedEntriesProps> = ({
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       className="mb-8"
     >
-      <div className="text-[11px] font-semibold tracking-tight text-text-muted mb-3 flex justify-between items-center">
+      <div className="text-caption font-semibold tracking-tight text-text-muted mb-3 flex justify-between items-center">
         <span>{t('parsed_title')}</span>
-        <span className="text-[9px] bg-[var(--bg-input)] px-1.5 py-0.5 rounded border border-[var(--border-color)]">{t('parsed_tap_to_edit')}</span>
+        <span className="text-tiny bg-[var(--bg-input)] px-1.5 py-0.5 rounded border border-[var(--border-color)]">{t('parsed_tap_to_edit')}</span>
       </div>
-      
+
       <div className="space-y-3 mb-4">
         <AnimatePresence mode="popLayout">
           {entries.map((entry, idx) => {
@@ -61,12 +61,12 @@ export const ParsedEntries: React.FC<ParsedEntriesProps> = ({
             const isIncome = entry.income !== null;
             const amount = isIncome ? entry.income : entry.expense;
             const icon = CATEGORY_ICONS[entry.category] || '💸';
-            
+
 
 
             return (
-              <motion.div 
-                key={idx} 
+              <motion.div
+                key={idx}
                 layout
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -78,19 +78,19 @@ export const ParsedEntries: React.FC<ParsedEntriesProps> = ({
                   {icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm truncate flex items-center gap-2">
+                  <div className="font-semibold text-body truncate flex items-center gap-2">
                     {entry.item}
                     <Edit2 size={10} className="text-text-muted opacity-40 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="flex flex-wrap items-center gap-2 mt-1">
-                    <span className="text-[9px] font-mono text-text-muted shrink-0">{entry.date}</span>
+                    <span className="text-tiny font-mono text-text-muted shrink-0">{entry.date}</span>
                     <div className="flex flex-wrap gap-1">
-                      <span className="text-[9px] px-1.5 py-0.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded text-text-secondary whitespace-nowrap">{entry.group}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded text-text-secondary whitespace-nowrap">{entry.category}</span>
+                      <span className="text-tiny px-1.5 py-0.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded text-text-secondary whitespace-nowrap">{entry.group}</span>
+                      <span className="text-tiny px-1.5 py-0.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded text-text-secondary whitespace-nowrap">{entry.category}</span>
                     </div>
                   </div>
                 </div>
-                <div className={`font-mono font-bold text-sm shrink-0 ml-2 ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
+                <div className={`font-mono font-bold text-body shrink-0 ml-2 ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
                   {isIncome ? '+' : '-'}{amount?.toLocaleString()}
                 </div>
               </motion.div>
@@ -112,7 +112,7 @@ export const ParsedEntries: React.FC<ParsedEntriesProps> = ({
         mode="edit"
       />
 
-      <button 
+      <button
         onClick={sendToNotion}
         disabled={isSending}
         className="w-full h-14 rounded-2xl bg-gradient-to-br from-[#7c6aff] to-[#a78bfa] text-white font-bold tracking-wide hover:shadow-[0_12px_32px_rgba(124,106,255,0.4)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:translate-y-0 disabled:shadow-none"

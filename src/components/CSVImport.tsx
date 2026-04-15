@@ -270,10 +270,10 @@ export const CSVImport: React.FC<CSVImportProps> = ({
 
   const ColSelect = ({ label, field, required }: { label: string; field: keyof ColumnMapping; required?: boolean }) => (
     <div>
-      <label className="text-[10px] font-bold text-text-muted mb-1 block">{label}{required && <span className="text-red-400 ml-0.5">*</span>}</label>
+      <label className="text-tiny font-bold text-text-muted mb-1 block">{label}{required && <span className="text-red-400 ml-0.5">*</span>}</label>
       <div className="relative">
         <select value={mapping[field]} onChange={e => setMapping(p => ({ ...p, [field]: e.target.value }))}
-          className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2 text-xs font-semibold appearance-none focus:border-[#7c6aff]/50 outline-none pr-8">
+          className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2 text-sub font-semibold appearance-none focus:border-[#7c6aff]/50 outline-none pr-8">
           <option value="">{t('csv_select_col')}</option>
           {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
         </select>
@@ -298,9 +298,9 @@ export const CSVImport: React.FC<CSVImportProps> = ({
                 <Upload size={22} className="text-[#7c6aff]" />
               </div>
               <div className="text-center">
-                <p className="text-xs font-bold text-[var(--text-primary)]">{t('csv_upload_title')}</p>
+                <p className="text-sub font-bold text-[var(--text-primary)]">{t('csv_upload_title')}</p>
                 {!isPremium && (
-                  <p className="text-[10px] mt-1 text-amber-400 font-bold flex items-center justify-center gap-1">
+                  <p className="text-tiny mt-1 text-amber-400 font-bold flex items-center justify-center gap-1">
                     <Crown size={13} style={{ color: '#f59e0b', filter: 'drop-shadow(0 0 3px #f59e0b88)' }} /> Tap to upgrade and unlock
                   </p>
                 )}
@@ -309,9 +309,9 @@ export const CSVImport: React.FC<CSVImportProps> = ({
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
             </div>
             <div className="mt-3 bg-[var(--bg-input)] rounded-xl p-3 border border-[var(--border-color)]">
-              <p className="text-[10px] font-bold text-text-muted mb-2">{t('csv_format_example')}</p>
+              <p className="text-tiny font-bold text-text-muted mb-2">{t('csv_format_example')}</p>
               <div className="overflow-x-auto rounded-lg border border-[var(--border-color)]">
-                <table className="w-full text-[9px]">
+                <table className="w-full text-tiny">
                   <thead>
                     <tr className="bg-[#7c6aff]/10 text-[#a78bfa]">
                       <th className="px-2 py-1.5 text-left font-bold">date</th>
@@ -324,7 +324,7 @@ export const CSVImport: React.FC<CSVImportProps> = ({
                   </thead>
                 </table>
               </div>
-              <p className="text-[9px] text-text-muted mt-1.5">{t('csv_format_hint')}</p>
+              <p className="text-tiny text-text-muted mt-1.5">{t('csv_format_hint')}</p>
             </div>
           </motion.div>
         )}
@@ -334,10 +334,10 @@ export const CSVImport: React.FC<CSVImportProps> = ({
           <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-black text-[var(--text-primary)]">{t('csv_col_mapping')}</p>
-                <p className="text-[10px] text-text-muted">{fileName} · {csvRows.length} {t('csv_rows')}</p>
+                <p className="text-sub font-black text-[var(--text-primary)]">{t('csv_col_mapping')}</p>
+                <p className="text-tiny text-text-muted">{fileName} · {csvRows.length} {t('csv_rows')}</p>
               </div>
-              <button onClick={reset} className="text-[10px] text-text-muted hover:text-red-400 font-bold">{t('csv_cancel')}</button>
+              <button onClick={reset} className="text-tiny text-text-muted hover:text-red-400 font-bold">{t('csv_cancel')}</button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -349,11 +349,11 @@ export const CSVImport: React.FC<CSVImportProps> = ({
 
             {/* Amount mode */}
             <div>
-              <p className="text-[10px] font-bold text-text-muted mb-2">{t('csv_amount_format')}</p>
+              <p className="text-tiny font-bold text-text-muted mb-2">{t('csv_amount_format')}</p>
               <div className="flex gap-2">
                 {(['split', 'single'] as const).map(m => (
                   <button key={m} onClick={() => setAmountMode(m)}
-                    className={`flex-1 py-2 rounded-xl text-[10px] font-bold border transition-all ${amountMode === m ? 'bg-[#7c6aff]/15 border-[#7c6aff]/40 text-[#a78bfa]' : 'border-[var(--border-color)] text-text-muted'}`}>
+                    className={`flex-1 py-2 rounded-xl text-tiny font-bold border transition-all ${amountMode === m ? 'bg-[#7c6aff]/15 border-[#7c6aff]/40 text-[#a78bfa]' : 'border-[var(--border-color)] text-text-muted'}`}>
                     {m === 'split' ? t('csv_split_columns') : t('csv_single_column')}
                   </button>
                 ))}
@@ -369,11 +369,11 @@ export const CSVImport: React.FC<CSVImportProps> = ({
               <div className="space-y-3">
                 <ColSelect label={t('csv_col_amount')} field="expense" required />
                 <div>
-                  <p className="text-[10px] font-bold text-text-muted mb-1.5">{t('csv_default_type')}</p>
+                  <p className="text-tiny font-bold text-text-muted mb-1.5">{t('csv_default_type')}</p>
                   <div className="flex gap-2">
                     {(['expense', 'income', 'auto'] as const).map(tp => (
                       <button key={tp} onClick={() => setDefaultType(tp)}
-                        className={`flex-1 py-2 rounded-xl text-[9px] font-bold border transition-all ${defaultType === tp ? 'bg-[#7c6aff]/15 border-[#7c6aff]/40 text-[#a78bfa]' : 'border-[var(--border-color)] text-text-muted'}`}>
+                        className={`flex-1 py-2 rounded-xl text-tiny font-bold border transition-all ${defaultType === tp ? 'bg-[#7c6aff]/15 border-[#7c6aff]/40 text-[#a78bfa]' : 'border-[var(--border-color)] text-text-muted'}`}>
                         {tp === 'auto' ? 'Auto' : tp === 'expense' ? '💸 Expense' : '💰 Income'}
                       </button>
                     ))}
@@ -386,26 +386,26 @@ export const CSVImport: React.FC<CSVImportProps> = ({
             {/* Default fallbacks */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-bold text-text-muted mb-1 block">{t('csv_default_group')}</label>
+                <label className="text-tiny font-bold text-text-muted mb-1 block">{t('csv_default_group')}</label>
                 <div className="relative">
                   <select value={defaultGroup} onChange={e => setDefaultGroup(e.target.value)}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2 text-xs font-semibold appearance-none outline-none focus:border-[#7c6aff]/50 pr-8">
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2 text-sub font-semibold appearance-none outline-none focus:border-[#7c6aff]/50 pr-8">
                     {groups.map(g => <option key={g} value={g}>{g}</option>)}
                   </select>
                   <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-text-muted mb-1 block">{t('csv_default_category')}</label>
+                <label className="text-tiny font-bold text-text-muted mb-1 block">{t('csv_default_category')}</label>
                 <input value={defaultCategory} onChange={e => setDefaultCategory(e.target.value)} placeholder="Others"
-                  className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#7c6aff]/50" />
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2 text-sub outline-none focus:border-[#7c6aff]/50" />
               </div>
             </div>
 
             {/* AI Toggle */}
             <div className="bg-[#7c6aff]/5 border border-[#7c6aff]/20 rounded-xl p-3 flex items-center gap-3">
               <div className="flex-1">
-                <p className="text-[11px] font-bold text-[#a78bfa] flex items-center gap-1.5">
+                <p className="text-caption font-bold text-[#a78bfa] flex items-center gap-1.5">
                   <Sparkles size={12} /> {t('csv_ai_toggle')}
                 </p>
               </div>
@@ -416,7 +416,7 @@ export const CSVImport: React.FC<CSVImportProps> = ({
             </div>
 
             <button onClick={buildPreview}
-              className="w-full h-11 rounded-xl bg-[#7c6aff] text-white text-xs font-bold hover:bg-[#a78bfa] transition-all flex items-center justify-center gap-2">
+              className="w-full h-11 rounded-xl bg-[#7c6aff] text-white text-sub font-bold hover:bg-[#a78bfa] transition-all flex items-center justify-center gap-2">
               {useAI ? <><Sparkles size={14} /> {t('csv_preview_with_ai')}</> : t('csv_preview_btn')}
             </button>
           </motion.div>
@@ -430,15 +430,15 @@ export const CSVImport: React.FC<CSVImportProps> = ({
               <Sparkles size={28} className="text-[#a78bfa] animate-pulse" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-black text-[var(--text-primary)]">{t('csv_processing')}</p>
-              <p className="text-[11px] text-text-muted mt-1">{aiStatus}</p>
+              <p className="text-body font-black text-[var(--text-primary)]">{t('csv_processing')}</p>
+              <p className="text-caption text-text-muted mt-1">{aiStatus}</p>
             </div>
             {/* Progress bar */}
             <div className="w-full bg-[var(--bg-input)] rounded-full h-2">
               <motion.div className="h-2 rounded-full bg-gradient-to-r from-[#7c6aff] to-[#a78bfa]"
                 animate={{ width: `${aiProgress}%` }} transition={{ duration: 0.3 }} />
             </div>
-            <p className="text-xs font-bold text-[#a78bfa]">{aiProgress}%</p>
+            <p className="text-sub font-bold text-[#a78bfa]">{aiProgress}%</p>
           </motion.div>
         )}
 
@@ -447,10 +447,10 @@ export const CSVImport: React.FC<CSVImportProps> = ({
           <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-black">{t('csv_preview_title')}</p>
-                <p className="text-[10px] text-text-muted">{previewEntries.length} {t('csv_preview_showing')}</p>
+                <p className="text-sub font-black">{t('csv_preview_title')}</p>
+                <p className="text-tiny text-text-muted">{previewEntries.length} {t('csv_preview_showing')}</p>
               </div>
-              <button onClick={() => setStep('map')} className="text-[10px] text-[#a78bfa] font-bold">{t('csv_back')}</button>
+              <button onClick={() => setStep('map')} className="text-tiny text-[#a78bfa] font-bold">{t('csv_back')}</button>
             </div>
 
             <div className="space-y-1.5 max-h-[240px] overflow-y-auto pr-1">
@@ -458,24 +458,24 @@ export const CSVImport: React.FC<CSVImportProps> = ({
                 <div key={i} className="bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl p-3 flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full shrink-0 ${e.income ? 'bg-[#34d399]' : 'bg-[#f87171]'}`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold truncate">{e.item}</p>
-                    <p className="text-[9px] text-text-muted">{e.date} · <span className="text-[#a78bfa]">{e.group}</span> · {e.category}</p>
+                    <p className="text-sub font-bold truncate">{e.item}</p>
+                    <p className="text-tiny text-text-muted">{e.date} · <span className="text-[#a78bfa]">{e.group}</span> · {e.category}</p>
                   </div>
-                  <span className={`text-xs font-black font-mono shrink-0 ${e.income ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
+                  <span className={`text-sub font-black font-mono shrink-0 ${e.income ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
                     {e.income ? '+' : '-'}{(e.income || e.expense || 0).toLocaleString()}
                   </span>
                 </div>
               ))}
               {previewEntries.length > 5 && (
-                <p className="text-center text-[10px] text-text-muted py-2">... and {previewEntries.length - 5} {t('csv_more_entries')}</p>
+                <p className="text-center text-tiny text-text-muted py-2">... and {previewEntries.length - 5} {t('csv_more_entries')}</p>
               )}
             </div>
 
             <button onClick={doImport} disabled={isImporting}
-              className="w-full h-11 rounded-xl bg-[#34d399] text-white text-xs font-bold hover:bg-[#6ee7b7] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full h-11 rounded-xl bg-[#34d399] text-white text-sub font-bold hover:bg-[#6ee7b7] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
               {isImporting ? <><Loader2 size={14} className="animate-spin" /> {t('csv_importing')}</> : t('csv_import_btn', { count: previewEntries.length })}
             </button>
-            <button onClick={reset} className="w-full h-9 rounded-xl border border-[var(--border-color)] text-xs text-text-muted font-bold hover:text-red-400 transition-all">
+            <button onClick={reset} className="w-full h-9 rounded-xl border border-[var(--border-color)] text-sub text-text-muted font-bold hover:text-red-400 transition-all">
               {t('csv_cancel')}
             </button>
           </motion.div>
@@ -489,10 +489,10 @@ export const CSVImport: React.FC<CSVImportProps> = ({
               <CheckCircle2 size={32} className="text-[#34d399]" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-black">{t('csv_done_title')}</p>
-              <p className="text-xs text-text-muted mt-1">✅ {importResult.success} succeeded {importResult.failed > 0 ? `· ❌ ${importResult.failed} failed` : ''}</p>
+              <p className="text-body font-black">{t('csv_done_title')}</p>
+              <p className="text-sub text-text-muted mt-1">✅ {importResult.success} succeeded {importResult.failed > 0 ? `· ❌ ${importResult.failed} failed` : ''}</p>
             </div>
-            <button onClick={reset} className="px-6 h-10 rounded-xl bg-[#7c6aff] text-white text-xs font-bold hover:bg-[#a78bfa] transition-all">
+            <button onClick={reset} className="px-6 h-10 rounded-xl bg-[#7c6aff] text-white text-sub font-bold hover:bg-[#a78bfa] transition-all">
               {t('csv_import_more')}
             </button>
           </motion.div>

@@ -13,18 +13,18 @@ export const HistoryList: React.FC<HistoryListProps> = ({ history, onSeeMore, on
   if (history.length === 0) return null;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="mt-12"
     >
       <div className="flex items-center justify-between mb-4">
-        <div className="text-[11px] font-semibold tracking-tight text-text-muted">
+        <div className="text-caption font-semibold tracking-tight text-text-muted">
           Recent activity
         </div>
-        <button 
+        <button
           onClick={onSeeMore}
-          className="text-[10px] font-bold text-[#a78bfa] hover:underline flex items-center gap-1"
+          className="text-tiny font-bold text-[#a78bfa] hover:underline flex items-center gap-1"
         >
           See More
         </button>
@@ -38,14 +38,14 @@ export const HistoryList: React.FC<HistoryListProps> = ({ history, onSeeMore, on
             <div key={entry.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-3.5 flex items-center gap-3 shadow-sm">
               <div className={`w-2 h-2 rounded-full shrink-0 ${isIncome ? 'bg-[#34d399]' : 'bg-[#f87171]'}`} />
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold truncate">{entry.item}</div>
-                <div className="text-[11px] text-text-secondary mt-0.5 font-medium">{entry.date} · {entry.category}</div>
+                <div className="text-body font-bold truncate">{entry.item}</div>
+                <div className="text-caption text-text-secondary mt-0.5 font-medium">{entry.date} · {entry.category}</div>
               </div>
               <div className="flex items-center gap-2">
-                <div className={`font-mono text-xs font-black shrink-0 ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
+                <div className={`font-mono text-sub font-black shrink-0 ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
                   {isIncome ? '+' : '-'}{amount?.toLocaleString()}
                 </div>
-                <button 
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     if (entry.id) onDelete(entry.id);
