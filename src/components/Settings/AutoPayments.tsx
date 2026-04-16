@@ -158,7 +158,7 @@ export const AutoPayments: React.FC<AutoPaymentsProps> = ({
           </button>
         )}
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#7c6aff]/8 to-[#7c6aff]/3 rounded-2xl p-4 mb-4">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 mb-4 shadow">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-body font-black text-[var(--text-primary)]">{t('autopay_header_title')}</p>
@@ -183,13 +183,14 @@ export const AutoPayments: React.FC<AutoPaymentsProps> = ({
         <AnimatePresence>
           {showForm && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,18,34,0.95)]">
-              <div className="bg-gradient-to-br from-[#7c6aff]/8 to-transparent border border-[#7c6aff]/30 rounded-2xl p-6 w-full max-w-md relative">
-                <button onClick={resetForm} className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-all">
+              className="fixed inset-0 z-50 flex items-center justify-center bg-[color:var(--modal-overlay,rgba(20,18,34,0.85))]">
+              <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 w-full max-w-md relative shadow-2xl shadow-[var(--border-color)]/20">
+                <button onClick={resetForm} className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-primary)] bg-[var(--bg-input)] border border-[var(--border-color)] shadow hover:text-white hover:bg-red-500 hover:border-red-500 transition-all focus:outline-none focus:ring-2 focus:ring-red-400/60"
+                  style={{ fontSize: 22, fontWeight: 900 }} aria-label="Close">
                   <span className="sr-only">Close</span>
-                  <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M6 14L14 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 6l10 10M6 16L16 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
                 </button>
-                <p className="text-sub font-black text-[#a78bfa] mb-4">{editingId ? t('autopay_edit_title') : t('autopay_new_title')}</p>
+                <p className="text-sub font-black text-[var(--text-primary)] mb-4">{editingId ? t('autopay_edit_title') : t('autopay_new_title')}</p>
                 {/* Item & Amount */}
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
@@ -257,12 +258,13 @@ export const AutoPayments: React.FC<AutoPaymentsProps> = ({
           <div className="space-y-2">
             {payments.map(p => (
               <motion.div key={p.id} layout
-                className={`rounded-xl px-3 py-2 flex gap-2 items-center transition-all ${p.active ? 'bg-[#18152a] border border-[#7c6aff]/20' : 'bg-[var(--bg-input)] border border-[var(--border-color)] opacity-60'}`}
+                className={`rounded-xl px-3 py-2 flex gap-2 items-center transition-all ${p.active ? 'bg-[var(--bg-card)] border border-[var(--border-color)] shadow-md' : 'bg-[var(--bg-input)] border border-[var(--border-color)] opacity-60'}`}
                 style={{ minHeight: 64 }}>
                 {/* Day badge */}
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#7c6aff] to-[#5a4ae8] flex flex-col items-center justify-center shrink-0 mr-2">
-                  <span className="text-tiny text-white/70 font-semibold leading-none">DAY</span>
-                  <span className="text-body font-bold text-white leading-tight" style={{ fontSize: 18 }}>{p.day_of_month}</span>
+                <div className="w-12 h-12 rounded-lg flex flex-col items-center justify-center shrink-0 mr-2"
+                  style={{ background: 'linear-gradient(135deg, var(--badge-from, #7c6aff22) 0%, var(--badge-to, #5a4ae833) 100%)' }}>
+                  <span className="text-tiny text-[var(--text-secondary)] font-semibold leading-none">DAY</span>
+                  <span className="text-body font-bold text-[var(--text-primary)] leading-tight" style={{ fontSize: 18 }}>{p.day_of_month}</span>
                 </div>
                 {/* Info: 4 rows */}
                 <div className="flex-1 min-w-0 flex flex-col gap-0.5">

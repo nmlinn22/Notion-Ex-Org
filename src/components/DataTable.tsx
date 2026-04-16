@@ -328,13 +328,6 @@ export const DataTable: React.FC<DataTableProps> = ({ entries, groups, categorie
 
       {/* Table */}
       <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden flex flex-col flex-1">
-        {/* Header */}
-        <div className="grid grid-cols-[1.8fr_1fr_1.2fr] bg-[var(--bg-input)] border-b border-[var(--border-color)] px-3 py-2">
-          {[t('col_item_date'), t('col_amount'), t('col_category_group')].map(h => (
-            <span key={h} className="text-tiny font-black uppercase tracking-wider text-text-muted">{h}</span>
-          ))}
-        </div>
-
         {/* Rows */}
         <div className="divide-y divide-[var(--border-color)] overflow-y-auto">
           {filtered.length === 0 ? (
@@ -347,25 +340,27 @@ export const DataTable: React.FC<DataTableProps> = ({ entries, groups, categorie
             const amount = isIncome ? entry.income : entry.expense;
             return (
               <div key={entry.id} onClick={() => storageMode === 'app' && setEditingEntry({ ...entry })}
-                className={`grid grid-cols-[1.8fr_1fr_1.2fr] px-3 py-2.5 hover:bg-[var(--bg-input)]/40 transition-all items-center ${storageMode === 'app' ? 'cursor-pointer' : 'cursor-default'}`}>
-                {/* Item + Date */}
-                <div className="min-w-0 pr-1">
-                  <div className="flex items-center gap-1">
+                className={`px-3 py-3 hover:bg-[var(--bg-input)]/40 transition-all ${storageMode === 'app' ? 'cursor-pointer' : 'cursor-default'}`}>
+                {/* Row 1: Item + Amount */}
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isIncome ? 'bg-[#34d399]' : 'bg-[#f87171]'}`} />
-                    <p className="text-sub font-semibold truncate">{entry.item}</p>
+                    <p className="text-body font-semibold truncate text-text-primary">{entry.item}</p>
                   </div>
-                  <p className="text-tiny text-[#a78bfa]/70 mt-0.5 pl-2.5">{entry.date?.slice(5)}</p>
-                </div>
-                {/* Amount */}
-                <p className={`text-sub font-black font-mono ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
-                  {isIncome ? '+' : '−'}{fmt(amount)}
-                </p>
-                {/* Category / Group */}
-                <div className="flex flex-col gap-0.5 pr-1">
-                  <p className="text-tiny text-text-muted truncate">
-                    {entry.category ? `${CATEGORY_ICONS[entry.category] ?? ''}  ${entry.category}` : '—'}
+                  <p className={`text-body font-black font-mono shrink-0 ${isIncome ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
+                    {isIncome ? '+' : '−'}{fmt(amount)}
                   </p>
-                  <p className="text-tiny text-[#a78bfa] font-semibold truncate">{entry.group ?? '—'}</p>
+                </div>
+
+                {/* Row 2: Category + Group + Date */}
+                <div className="flex items-center justify-between text-caption text-text-muted pl-2.5">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className="truncate">
+                      {entry.category ? `${CATEGORY_ICONS[entry.category] ?? ''}  ${entry.category}` : '—'}
+                    </span>
+                    <span className="truncate">{entry.group ?? '—'}</span>
+                  </div>
+                  <span className="shrink-0 ml-2">{entry.date?.slice(5)}</span>
                 </div>
               </div>
             );

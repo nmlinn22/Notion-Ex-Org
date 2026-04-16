@@ -78,6 +78,19 @@ export const AuthForm: React.FC<AuthFormProps> = ({ status, setStatus }) => {
           setAuthLoading(false);
           return;
         }
+        // Disposable email check
+        const disposableDomains = [
+          'mailinator.com', 'tempmail.com', 'guerrillamail.com',
+          'yopmail.com', 'sharklasers.com', 'pmdeal.com',
+          'throwam.com', 'trashmail.com', 'maildrop.cc',
+          '10minutemail.com', 'fakeinbox.com', 'dispostable.com'
+        ];
+        const emailDomain = email.split('@')[1]?.toLowerCase();
+        if (disposableDomains.includes(emailDomain)) {
+          toast.error('Temporary email addresses are not allowed');
+          setAuthLoading(false);
+          return;
+        }
         // Sign up with username in user_metadata
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -88,13 +101,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ status, setStatus }) => {
         });
         if (error) throw error;
 
-        // Also upsert into profiles table if user created
-        if (data.user) {
-          await supabase
-            .from('profiles')
-            .upsert({ id: data.user.id, display_name: trimmedUsername }, { onConflict: 'id' })
-            .eq('id', data.user.id);
-        }
+        // Profile is auto-created by database trigger (handle_new_user)
+        // display_name will be updated after email verification via onAuthStateChange
 
         toast.success(t('toast_signup_success'));
         setStatus({ type: 'success', message: t('toast_signup_success') });

@@ -4,7 +4,7 @@ import { Session } from '@supabase/supabase-js';
 import {
   LogOut, Sun, Moon, Database, Smartphone,
   ShieldCheck, Crown,
-  Wallet, KeyRound, Trash2, AlertTriangle, X, Loader2, Eye, EyeOff, Settings, Check,
+  Wallet, KeyRound, Trash2, AlertTriangle, X, Loader2, Eye, EyeOff, Settings, Check, Edit,
 } from 'lucide-react';
 import { Entry } from '../types';
 import { supabase } from '../lib/supabase';
@@ -474,11 +474,11 @@ export const Profile: React.FC<ProfileProps> = ({
               </button>
             </div>
           ) : (
-            <button onClick={() => { setNameInput(displayName); setEditingName(true); }} className="group flex items-center gap-1 text-left w-full">
-              <span className="text-title font-semibold text-[var(--text-primary)] group-hover:text-[#a78bfa] transition-colors truncate">
-                {displayName || <span className="text-[var(--text-muted)] font-normal text-body">{t('profile_add_display_name')}</span>}
+            <button onClick={() => { setNameInput(displayName); setEditingName(true); }} className="group flex items-center gap-1.5 text-left w-full">
+              <span className="text-lg font-semibold text-[var(--text-primary)] truncate flex-1">
+                {displayName || <span className="text-[var(--text-muted)] font-normal">{t('profile_add_display_name')}</span>}
               </span>
-              <Settings size={10} className="text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+              <Edit size={13} className="text-[#a78bfa]/60 shrink-0" />
             </button>
           )}
           <p className="text-caption text-[var(--text-muted)] truncate mt-0.5">{email}</p>
@@ -584,10 +584,30 @@ export const Profile: React.FC<ProfileProps> = ({
         </GroupBox>
       </motion.div>
 
-      {/* Logout */}
-      <motion.div {...si(4)} className="px-4">
-        <button onClick={handleLogout}
-          className="w-full h-12 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] font-medium text-[13.5px] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+      {/* Version Display & Sign Out Section */}
+      <motion.div {...si(4)} className="px-4 flex flex-col items-center gap-6 mt-2 pb-6">
+        {/* Version Display (Tap to Copy) */}
+        <button
+          onClick={() => {
+            const version = import.meta.env.VITE_APP_VERSION || '1.1.5';
+            navigator.clipboard.writeText(`v${version}`);
+            toast.success('Version copied!');
+          }}
+          className="group flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+        >
+          <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] group-hover:text-[#7c6aff]">
+            App Version
+          </span>
+          <span className="text-caption font-mono font-bold text-text-secondary bg-[var(--bg-input)] px-4 py-1.5 rounded-full border border-[var(--border-color)] group-hover:border-[#7c6aff]/30">
+            v{import.meta.env.VITE_APP_VERSION || '1.1.5'}
+          </span>
+        </button>
+
+        {/* Sign Out Button (Notion-Ex Style) */}
+        <button
+          onClick={handleLogout}
+          className="w-full h-12 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] font-medium text-[13.5px] hover:bg-red-500/5 hover:text-red-400 hover:border-red-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        >
           <LogOut size={15} />
           {t('auth_sign_out')}
         </button>

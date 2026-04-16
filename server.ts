@@ -112,14 +112,33 @@ const authenticateUser = async (req: any, res: any, next: any) => {
       return res.status(401).json({ error: "Invalid token" });
     }
 
-    const { data: profile, error: profileError } = await supabase
+    let { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('is_admin, role')
       .eq('id', userId)
       .single();
 
-    if (profileError || !profile) {
-      return res.status(403).json({ error: "Profile not found." });
+    // If profile doesn't exist, auto-create it with default values
+    if (profileError && profileError.code === 'PGRST116') {
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert({ id: userId, role: 'member', is_admin: false })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error("Profile auto-create error:", createError);
+        return res.status(500).json({ error: "Failed to create user profile" });
+      }
+
+      profile = newProfile;
+    } else if (profileError) {
+      console.error("Profile fetch error:", profileError);
+      return res.status(403).json({ error: "Profile access error" });
+    }
+
+    if (!profile) {
+      return res.status(403).json({ error: "Profile not found and auto-create failed." });
     }
 
     req.user = { id: userId };

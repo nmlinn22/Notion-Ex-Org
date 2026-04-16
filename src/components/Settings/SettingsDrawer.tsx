@@ -181,8 +181,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
             <div className="flex-1 overflow-y-auto p-3.5 custom-scrollbar">
               {status && (
                 <div className={`p-2.5 rounded-xl text-caption font-medium flex items-center gap-2 mb-3 border ${status.type === 'loading' ? 'bg-[#7c6aff15] border-[#7c6aff30] text-[#a78bfa]' :
-                    status.type === 'success' ? 'bg-[#34d39915] border-[#34d39930] text-[#34d399]' :
-                      'bg-[#f8717115] border-[#f8717130] text-[#f87171]'
+                  status.type === 'success' ? 'bg-[#34d39915] border-[#34d39930] text-[#34d399]' :
+                    'bg-[#f8717115] border-[#f8717130] text-[#f87171]'
                   }`}>
                   {status.type === 'loading' ? <Loader2 size={14} className="animate-spin" /> :
                     status.type === 'success' ? <CheckCircle2 size={14} /> :
@@ -197,33 +197,28 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                   {/* Premium Package — all users can see, label changes by role */}
                   <button
                     onClick={() => setSettingsView('premium')}
-                    className="w-full p-2.5 rounded-xl bg-[#7c6aff]/5 border border-[#7c6aff]/25 flex items-center justify-between text-text-primary hover:bg-[#7c6aff]/10 transition-all group"
+                    className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-text-primary hover:bg-[var(--bg-hover)] transition-all group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-[#7c6aff]/15 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-[#7c6aff]/20">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                         <Crown size={18} className="text-[#7c6aff]" />
                       </div>
-                      <div>
-                        <span className="text-body font-bold tracking-tight text-[#a78bfa]">Premium Package</span>
-                        <p className="text-tiny text-text-muted leading-none mt-0.5">
-                          {isPremiumUser ? t('premium_renew_desc') : t('premium_unlock_desc')}
-                        </p>
-                      </div>
+                      <span className="text-title font-bold tracking-tight text-text-primary">Premium Package</span>
                     </div>
-                    <ChevronRight size={16} className="text-[#7c6aff] group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
                   </button>
 
                   {/* Admin Panel — admin only */}
                   {isAdmin && (
                     <button
                       onClick={() => setSettingsView('admin')}
-                      className="w-full p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/10 flex items-center justify-between text-amber-500 hover:bg-amber-500/10 transition-all group"
+                      className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-text-primary hover:bg-[var(--bg-hover)] transition-all group"
                     >
                       <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-amber-500/20">
+                        <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                           <Crown size={18} className="text-amber-500" />
                         </div>
-                        <span className="text-body font-bold tracking-tight">{t('settings_admin_panel')}</span>
+                        <span className="text-title font-bold tracking-tight text-text-primary">{t('settings_admin_panel')}</span>
                         {/* Notification badges */}
                         <div className="flex items-center gap-1 ml-1">
                           {admin.pendingUsers?.length > 0 && (
@@ -238,7 +233,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                           )}
                         </div>
                       </div>
-                      <ChevronRight size={16} className="text-amber-500/40 group-hover:translate-x-1 transition-transform" />
+                      <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
                     </button>
                   )}
 
@@ -248,10 +243,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                     className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-text-primary hover:bg-[var(--bg-hover)] transition-all group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-blue-500/20">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                         <Zap size={18} className="text-blue-500" />
                       </div>
-                      <span className="text-body font-bold tracking-tight">{t('settings_api_credentials')}</span>
+                      <span className="text-title font-bold tracking-tight text-text-primary">{t('settings_api_credentials')}</span>
                     </div>
                     <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -259,10 +254,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                   {/* Language Switcher */}
                   <div className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center shadow-sm shadow-emerald-500/20">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center shadow-sm">
                         <Globe size={18} className="text-emerald-500" />
                       </div>
-                      <span className="text-body font-bold tracking-tight">Language/ဘာသာစကား</span>
+                      <span className="text-title font-bold tracking-tight text-text-primary">Language/ဘာသာစကား</span>
                     </div>
                     <div className="flex items-center gap-1 bg-[var(--bg-main)] rounded-xl p-1 border border-[var(--border-color)]">
                       <button
@@ -286,10 +281,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                     className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-text-primary hover:bg-[var(--bg-hover)] transition-all group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-indigo-500/20">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                         <Lightbulb size={18} className="text-indigo-500" />
                       </div>
-                      <span className="text-body font-bold tracking-tight">{t('settings_notion_guide')}</span>
+                      <span className="text-title font-bold tracking-tight text-text-primary">{t('settings_notion_guide')}</span>
                     </div>
                     <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -300,10 +295,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                     className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-text-primary hover:bg-[var(--bg-hover)] transition-all group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-violet-500/20">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                         <FolderOpen size={18} className="text-violet-500" />
                       </div>
-                      <span className="text-body font-bold tracking-tight">{t('settings_customize')}</span>
+                      <span className="text-title font-bold tracking-tight text-text-primary">{t('settings_customize')}</span>
                     </div>
                     <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
                   </button>
@@ -315,10 +310,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                       className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-text-primary hover:bg-[var(--bg-hover)] transition-all group"
                     >
                       <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-indigo-500/20">
+                        <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                           <History size={18} className="text-indigo-500" />
                         </div>
-                        <span className="text-body font-bold tracking-tight">{t('settings_history')}</span>
+                        <span className="text-title font-bold tracking-tight text-text-primary">{t('settings_history')}</span>
                       </div>
                       <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
                     </button>
@@ -330,11 +325,11 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                     className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-text-primary hover:bg-[var(--bg-hover)] transition-all group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-emerald-500/20">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                         <Calendar size={18} className="text-emerald-500" />
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-body font-bold tracking-tight">{t('settings_auto_payments')}</span>
+                        <span className="text-title font-bold tracking-tight text-text-primary">{t('settings_auto_payments')}</span>
                         {!isPremiumUser && (
                           <Crown size={13} className="text-amber-500" style={{ filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                         )}
@@ -349,11 +344,11 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                     className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-text-primary hover:bg-[var(--bg-hover)] transition-all group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-[#7c6aff]/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-[#7c6aff]/20">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                         <Cloud size={18} className="text-[#7c6aff]" />
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-body font-bold tracking-tight">{t('settings_backup')}</span>
+                        <span className="text-title font-bold tracking-tight text-text-primary">{t('settings_backup')}</span>
                         {!isPremiumUser && (
                           <Crown size={13} className="text-amber-500" style={{ filter: 'drop-shadow(0 0 3px #f59e0b88)' }} />
                         )}
@@ -369,10 +364,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                     className="w-full p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-text-primary hover:bg-[var(--bg-hover)] transition-all group"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg bg-pink-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-pink-500/20">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                         <MessageCircle size={18} className="text-pink-500" />
                       </div>
-                      <span className="text-body font-bold tracking-tight">{t('settings_contact')}</span>
+                      <span className="text-title font-bold tracking-tight text-text-primary">{t('settings_contact')}</span>
                     </div>
                     <ChevronRight size={16} className="text-text-muted group-hover:translate-x-1 transition-transform" />
                   </button>
