@@ -7,7 +7,7 @@ export interface Notification {
   user_id: string;
   title: string;
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'error' | 'info' | 'warning';
   is_read: boolean;
   created_at: string;
 }
@@ -101,12 +101,25 @@ export function useNotifications(session: Session | null) {
     }
   };
 
+  const deleteAllNotifications = async () => {
+    if (!session?.user?.id) return;
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', session.user.id);
+    if (!error) {
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+  };
+
   return {
     notifications,
     unreadCount,
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    deleteAllNotifications,
     refresh: fetchNotifications
   };
 }

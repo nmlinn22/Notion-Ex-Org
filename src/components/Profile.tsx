@@ -492,7 +492,7 @@ export const Profile: React.FC<ProfileProps> = ({
                 {premiumExpiresAt && (() => {
                   const days = Math.ceil((new Date(premiumExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                   return days > 0
-                    ? <span className="bg-[#7c6aff]/20 px-1 rounded-full text-tiny">{days} ရက်ကျန်</span>
+                    ? <span className="bg-[#7c6aff]/20 px-1 rounded-full text-tiny">{days}</span>
                     : <span className="bg-red-500/20 text-red-400 px-1 rounded-full text-tiny">သက်တမ်းကုန်</span>;
                 })()}
               </span>

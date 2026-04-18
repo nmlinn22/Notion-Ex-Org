@@ -1274,6 +1274,121 @@ app.delete("/api/backups/:id", authenticateUser, async (req: any, res) => {
   }
 });
 
+// POST /api/notifications — Create notification for current user
+app.post("/api/notifications", authenticateUser, async (req: any, res) => {
+  const userId = req.user.id;
+  const { title, message, type } = req.body;
+
+  if (!title || !message) {
+    return res.status(400).json({ error: "title and message are required" });
+  }
+
+  try {
+    const { error } = await supabase.from("notifications").insert({
+      user_id: userId,
+      title: title || "",
+      message: message || "",
+      type: type || "info"
+    });
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error("Notification creation error:", err);
+    res.status(500).json({ error: err.message || "Failed to create notification" });
+  }
+});
+
+// DELETE /api/account/self — User deletes their own account
+app.delete("/api/account/self", authenticateUser, async (req: any, res) => {
+  const userId = req.user.id;
+
+  try {
+    // Delete all user data from Supabase (cascade delete)
+    // Delete from related tables first
+    await supabase.from("entries").delete().eq("user_id", userId);
+    await supabase.from("budgets").delete().eq("user_id", userId);
+    await supabase.from("auto_payments").delete().eq("user_id", userId);
+    await supabase.from("notifications").delete().eq("user_id", userId);
+    await supabase.from("backups").delete().eq("user_id", userId);
+    await supabase.from("payment_requests").delete().eq("user_id", userId);
+    await supabase.from("settings").delete().eq("user_id", userId);
+
+    // Delete from profiles
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
+
+    if (profileError) throw profileError;
+
+    // Delete from auth using admin API
+    // Note: This requires SUPABASE_SERVICE_ROLE_KEY and the user must exist
+    try {
+      if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error("Missing Supabase admin credentials");
+      }
+      const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+      await adminClient.auth.admin.deleteUser(userId);
+    } catch (authErr: any) {
+      console.warn("Could not delete from auth (may already be deleted):", authErr.message);
+      // Continue anyway as profile deletion succeeded
+    }
+
+    res.json({ success: true, message: "Account and all associated data have been deleted" });
+  } catch (err: any) {
+    console.error("Account deletion error:", err);
+    res.status(500).json({ error: err.message || "Failed to delete account" });
+  }
+});
+
+// POST /api/admin/broadcast — Admin sends message to all users
+app.post("/api/admin/broadcast", authenticateUser, async (req: any, res) => {
+  // Check admin permission
+  if (!req.isAdmin) {
+    return res.status(403).json({ error: "Admin only" });
+  }
+
+  const { message, type } = req.body;
+
+  if (!message || !message.trim()) {
+    return res.status(400).json({ error: "message is required" });
+  }
+
+  try {
+    // Get all user IDs from profiles
+    const { data: profiles, error: fetchError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("is_banned", false); // Don't send to banned users
+
+    if (fetchError) throw fetchError;
+
+    if (!profiles || profiles.length === 0) {
+      return res.json({ success: true, count: 0 });
+    }
+
+    // Insert notification for each user
+    const notifications = profiles.map((profile: any) => ({
+      user_id: profile.id,
+      title: "📢 Admin Announcement",
+      message: message.trim(),
+      type: type || "info"
+    }));
+
+    const { error: insertError } = await supabase
+      .from("notifications")
+      .insert(notifications);
+
+    if (insertError) throw insertError;
+
+    res.json({ success: true, count: profiles.length });
+  } catch (err: any) {
+    console.error("Broadcast error:", err);
+    res.status(500).json({ error: err.message || "Failed to broadcast message" });
+  }
+});
+
 
 // Vite middleware for development
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {

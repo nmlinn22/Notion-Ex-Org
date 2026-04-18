@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Bell, Check, Trash2, X, Info, CheckCircle, AlertCircle } from 'lucide-react';
+import { Bell, Check, Trash2, X, Info, CheckCircle, AlertCircle, Trash } from 'lucide-react';
 import { useNotifications, Notification } from '../hooks/useNotifications';
 import { Session } from '@supabase/supabase-js';
 import { useLanguage } from '../lib/LanguageContext';
@@ -11,10 +11,11 @@ interface NotificationBellProps {
 
 export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) => {
   const { t } = useLanguage();
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications(session);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, deleteAllNotifications } = useNotifications(session);
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownTop, setDropdownTop] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLButtonElement>(null);
 
@@ -40,6 +41,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
     switch (type) {
       case 'success': return <CheckCircle size={14} className="text-emerald-400" />;
       case 'error': return <AlertCircle size={14} className="text-red-400" />;
+      case 'warning': return <AlertCircle size={14} className="text-amber-400" />;
       default: return <Info size={14} className="text-blue-400" />;
     }
   };
@@ -79,7 +81,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             className="fixed right-3 mt-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-[200] overflow-hidden"
             style={{
-              width: 'min(270px, calc(100vw - 24px))',
+              width: 'min(340px, calc(100vw - 24px))',
               top: dropdownTop,
             }}
           >
@@ -91,6 +93,15 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
             <div className="px-4 py-3 border-b border-[var(--border-color)] flex items-center justify-between bg-[var(--bg-input)]/50">
               <h3 className="text-body font-bold text-text-primary">{t('notification_title')}</h3>
               <div className="flex items-center gap-2">
+                {notifications.length > 0 && (
+                  <button
+                    onClick={() => setShowDeleteAllConfirm(true)}
+                    className="text-caption font-semibold text-red-400 hover:text-red-500 hover:underline"
+                    title={t('notification_delete_all')}
+                  >
+                    {t('notification_delete_all')}
+                  </button>
+                )}
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
@@ -121,7 +132,6 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
                         className={`group p-4 transition-colors cursor-pointer hover:bg-[var(--bg-hover)] ${!noti.is_read ? 'bg-[#7c6aff]/5' : ''}`}
                         onClick={() => {
                           setExpandedId(isExpanded ? null : noti.id);
-                          if (!noti.is_read) markAsRead(noti.id);
                         }}
                       >
                         <div className="flex gap-3 items-start">
@@ -139,6 +149,20 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
                             </motion.p>
                             {!isExpanded && noti.message.length > 80 && (
                               <p className="text-tiny text-[#a78bfa] mt-1 font-semibold">{t('notification_tap_to_read')}</p>
+                            )}
+                            {isExpanded && !noti.is_read && (
+                              <div className="flex gap-2 mt-3">
+                                <button
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    markAsRead(noti.id);
+                                  }}
+                                  className="text-tiny font-semibold text-[#a78bfa] hover:text-[#c9b5ff] flex items-center gap-1"
+                                >
+                                  <Check size={14} />
+                                  {t('notification_mark_as_read')}
+                                </button>
+                              </div>
                             )}
                           </div>
                           <button
@@ -163,6 +187,52 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ session }) =
             <div className="px-4 py-2 bg-[var(--bg-input)]/30 border-t border-[var(--border-color)] text-center">
               <p className="text-tiny text-text-muted">{t('notification_recent')}</p>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete All Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteAllConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[500] flex items-center justify-center bg-black/30"
+            onClick={() => setShowDeleteAllConfirm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl p-6 max-w-sm mx-4"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <Trash size={20} className="text-red-400" />
+                </div>
+                <h3 className="text-body font-bold text-text-primary">{t('notification_delete_all')}</h3>
+              </div>
+              <p className="text-caption text-text-secondary mb-6">{t('notification_delete_all_confirm')}</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteAllConfirm(false)}
+                  className="flex-1 py-2 px-4 rounded-lg border border-[var(--border-color)] text-text-primary hover:bg-[var(--bg-hover)] font-semibold transition-colors"
+                >
+                  {t('btn_cancel')}
+                </button>
+                <button
+                  onClick={async () => {
+                    await deleteAllNotifications();
+                    setShowDeleteAllConfirm(false);
+                  }}
+                  className="flex-1 py-2 px-4 rounded-lg bg-red-500 text-white hover:bg-red-600 font-semibold transition-colors"
+                >
+                  {t('notification_delete_all')}
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

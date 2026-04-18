@@ -16,14 +16,18 @@ export function useAuth(setStatus: (status: Status | null) => void) {
     try {
       const user = currentSession.user;
       if (user.user_metadata?.display_name) return;
+
       const { data: profile } = await supabase
         .from('profiles').select('display_name').eq('id', user.id).single();
+
       if (profile?.display_name) return;
+
       const emailPrefix = user.email?.split('@')[0] || 'user';
       await supabase.from('profiles').update({ display_name: emailPrefix }).eq('id', user.id);
       await supabase.auth.updateUser({ data: { display_name: emailPrefix } });
-    } catch {
-      // Non-critical
+    } catch (err: any) {
+      console.warn('ensureDisplayName error (non-critical):', err.message);
+      // Non-critical - continue anyway
     }
   }, []);
 
@@ -35,9 +39,51 @@ export function useAuth(setStatus: (status: Status | null) => void) {
         .eq('id', currentSession.user.id)
         .single();
 
-      if (error) throw error;
+      // If profile doesn't exist (e.g., new user signup), create it
+      if (error && error.code === 'PGRST116') {
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: currentSession.user.id,
+            role: 'member',
+            is_admin: false,
+            display_name: currentSession.user.user_metadata?.display_name || currentSession.user.email?.split('@')[0] || 'User'
+          })
+          .select()
+          .single();
 
-      if (data) {
+        if (createError) {
+          console.error('Profile auto-create error:', createError);
+          // Continue anyway - user might not have permission due to RLS
+          setIsAdmin(false);
+          setUserRole('member');
+          setProfileReady(true);
+          return;
+        }
+
+        if (newProfile) {
+          setIsAdmin(newProfile.is_admin || false);
+          setUserRole(newProfile.role as 'member' | 'premium' | 'admin');
+        }
+      } else if (error) {
+        console.error('Profile fetch error:', error);
+        // Try to create profile as fallback
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .insert({
+            id: currentSession.user.id,
+            role: 'member',
+            is_admin: false,
+            display_name: currentSession.user.user_metadata?.display_name || currentSession.user.email?.split('@')[0] || 'User'
+          })
+          .select()
+          .single();
+
+        if (newProfile) {
+          setIsAdmin(newProfile.is_admin || false);
+          setUserRole(newProfile.role as 'member' | 'premium' | 'admin');
+        }
+      } else if (data) {
         let role = data.role || (data.is_admin ? 'admin' : 'member');
 
         // Premium expiry auto-downgrade
@@ -56,6 +102,7 @@ export function useAuth(setStatus: (status: Status | null) => void) {
         setUserRole(role as 'member' | 'premium' | 'admin');
       }
     } catch (err: any) {
+      console.error('Profile fetch/create error:', err);
       setStatus({ type: 'error', message: translateError(err.message) });
     } finally {
       setProfileReady(true);

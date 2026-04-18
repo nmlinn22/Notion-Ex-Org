@@ -234,6 +234,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
   const donutColors = isNoData ? ['#333'] : COLORS;
   const isNow = month === now.getMonth() && year === now.getFullYear();
 
+  // ── Tap-to-highlight slice state ──
+  const [activeSlice, setActiveSlice] = React.useState<string | null>(null);
+
+  // Reset when tab/filter/period changes
+  React.useEffect(() => { setActiveSlice(null); }, [mainTab, month, year, groupGroupFilter, catGroupFilter]);
+
   const Breadcrumb = () => {
     if (level === 'summary') return null;
     return (
@@ -255,55 +261,139 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
     );
   };
 
-  const Overview = () => (
-    <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4">
-      <p className="text-caption font-bold text-text-muted uppercase tracking-wider mb-3">{t('dashboard_overview')}</p>
-      <div className="flex items-center gap-4">
-        <div className="w-[110px] h-[110px] shrink-0">
+  // ── Custom outside label renderer for pie chart ──
+  const renderOutsideLabel = ({ cx, cy, midAngle, outerRadius, name, value, index }: any) => {
+    if (isNoData) return null;
+    const RADIAN = Math.PI / 180;
+    const pct = donutData.reduce((s, d) => s + d.value, 0);
+    const slicePct = pct > 0 ? Math.round((value / pct) * 100) : 0;
+    if (slicePct < 3) return null; // skip tiny slices
+
+    const radius = outerRadius + 22;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const lineX1 = cx + (outerRadius + 3) * Math.cos(-midAngle * RADIAN);
+    const lineY1 = cy + (outerRadius + 3) * Math.sin(-midAngle * RADIAN);
+    const lineX2 = cx + (outerRadius + 14) * Math.cos(-midAngle * RADIAN);
+    const lineY2 = cy + (outerRadius + 14) * Math.sin(-midAngle * RADIAN);
+    const color = COLORS[index % COLORS.length];
+    const isRight = x > cx;
+
+    return (
+      <g key={`label-${index}`}>
+        <line x1={lineX1} y1={lineY1} x2={lineX2} y2={lineY2} stroke={color} strokeWidth={1.5} opacity={0.7} />
+        <text
+          x={x}
+          y={y - 6}
+          textAnchor={isRight ? 'start' : 'end'}
+          fill={color}
+          fontSize={10}
+          fontWeight={700}
+        >
+          {name.length > 10 ? name.slice(0, 10) + '…' : name}
+        </text>
+        <text
+          x={x}
+          y={y + 7}
+          textAnchor={isRight ? 'start' : 'end'}
+          fill={color}
+          fontSize={9}
+          fontWeight={600}
+          opacity={0.85}
+        >
+          {slicePct}%
+        </text>
+      </g>
+    );
+  };
+
+  const Overview = () => {
+    const selectedData = activeSlice ? donutData.find(d => d.name === activeSlice) : null;
+    const selectedIdx = activeSlice ? donutData.findIndex(d => d.name === activeSlice) : -1;
+    const total = donutData.reduce((s, d) => s + d.value, 0);
+
+    return (
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-caption font-bold text-text-muted uppercase tracking-wider">{t('dashboard_overview')}</p>
+          {activeSlice && (
+            <button onClick={() => setActiveSlice(null)} className="text-tiny font-bold text-[#a78bfa] hover:underline">
+              {t('filter_all')}
+            </button>
+          )}
+        </div>
+
+        {/* ── Center pie chart ── */}
+        <div className="w-full h-[180px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={donutData} cx="50%" cy="50%" innerRadius={30} outerRadius={48} dataKey="value" strokeWidth={0}>
-                {donutData.map((_, i) => <Cell key={i} fill={donutColors[i % donutColors.length]} />)}
+              <Pie
+                data={donutData}
+                cx="50%" cy="50%"
+                innerRadius={0}
+                outerRadius={58}
+                dataKey="value"
+                strokeWidth={2}
+                stroke="var(--bg-card)"
+                labelLine={false}
+                label={renderOutsideLabel}
+                onClick={(entry: any) => {
+                  if (isNoData) return;
+                  setActiveSlice((prev: string | null) => prev === entry.name ? null : entry.name);
+                }}
+                style={{ cursor: isNoData ? 'default' : 'pointer' }}
+                animationBegin={0}
+                animationDuration={600}
+                animationEasing="ease-out"
+              >
+                {donutData.map((d, i) => (
+                  <Cell
+                    key={i}
+                    fill={donutColors[i % donutColors.length]}
+                    opacity={activeSlice && activeSlice !== d.name ? 0.2 : 1}
+                    style={{ transition: 'opacity 0.25s', outline: 'none' }}
+                  />
+                ))}
               </Pie>
-              <Tooltip formatter={(v: any) => (v as number).toLocaleString()}
-                contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 10 }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex-1 min-w-0">
-          {isNoData ? (
-            <p className="text-text-muted text-sub italic">{t('no_data')}</p>
-          ) : (
-            <div className="space-y-1.5 max-h-[100px] overflow-y-auto pr-1">
-              {donutData.map((d, i) => (
-                <div key={d.name} className="flex items-center justify-between gap-2 min-w-0">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                    <span className="text-caption text-text-muted font-medium truncate">{d.name}</span>
-                  </div>
-                  <span className="text-caption font-bold shrink-0" style={{ color: COLORS[i % COLORS.length] }}>{fmt(d.value)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="pt-2 mt-2 border-t border-[var(--border-color)] flex gap-3">
-            <div>
-              <p className="text-tiny text-text-muted font-semibold uppercase tracking-wide mb-0.5">{t('dashboard_income')}</p>
-              <p className="text-sub font-black text-[#34d399]">{fmt(totalIncome)}</p>
-            </div>
-            <div>
-              <p className="text-tiny text-text-muted font-semibold uppercase tracking-wide mb-0.5">{t('dashboard_expense')}</p>
-              <p className="text-sub font-black text-[#f87171]">{fmt(totalExpense)}</p>
-            </div>
-            <div>
-              <p className="text-tiny text-text-muted font-semibold uppercase tracking-wide mb-0.5">{t('dashboard_balance')}</p>
-              <p className={`text-sub font-black ${balance >= 0 ? 'text-[#a78bfa]' : 'text-[#f87171]'}`}>{balance >= 0 ? '+' : ''}{fmt(balance)}</p>
-            </div>
+
+        {/* ── Center label (selected slice) ── */}
+        {activeSlice && selectedData && (
+          <div className="flex flex-col items-center -mt-4 mb-3">
+            <p className="text-caption font-bold text-text-muted">{selectedData.name}</p>
+            <p className="text-lg font-black" style={{ color: COLORS[selectedIdx % COLORS.length] }}>
+              {selectedData.value.toLocaleString()}
+            </p>
+            <p className="text-tiny text-text-muted">
+              {total > 0 ? Math.round((selectedData.value / total) * 100) : 0}%
+            </p>
+          </div>
+        )}
+
+        {/* ── Income / Expense / Balance ── */}
+        <div className="flex gap-2 mt-1 pt-3 border-t border-[var(--border-color)]">
+          <div className="flex-1 text-center">
+            <p className="text-tiny text-text-muted font-semibold uppercase tracking-wide mb-0.5">{t('dashboard_income')}</p>
+            <p className="text-sub font-black text-[#34d399]">{fullFmt(totalIncome)}</p>
+          </div>
+          <div className="w-px bg-[var(--border-color)]" />
+          <div className="flex-1 text-center">
+            <p className="text-tiny text-text-muted font-semibold uppercase tracking-wide mb-0.5">{t('dashboard_expense')}</p>
+            <p className="text-sub font-black text-[#f87171]">{fullFmt(totalExpense)}</p>
+          </div>
+          <div className="w-px bg-[var(--border-color)]" />
+          <div className="flex-1 text-center">
+            <p className="text-tiny text-text-muted font-semibold uppercase tracking-wide mb-0.5">{t('dashboard_balance')}</p>
+            <p className={`text-sub font-black ${balance >= 0 ? 'text-[#a78bfa]' : 'text-[#f87171]'}`}>{balance >= 0 ? '+' : ''}{fullFmt(balance)}</p>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
 
   return (
     <div className="relative z-10 w-full max-w-full mx-auto px-3 sm:px-6 pb-28 pt-6 flex flex-col gap-3 overflow-x-hidden">
@@ -332,8 +422,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
         {(['group', 'trend'] as const).map(tab => (
           <button key={tab} onClick={() => setMainTab(tab)}
             className={`flex-1 py-2 px-1 rounded-xl text-sub font-bold transition-all border min-h-[40px] whitespace-normal leading-tight text-center ${mainTab === tab
-              ? 'bg-[#7c6aff] text-white border-[#7c6aff] shadow-md shadow-[#7c6aff]/25'
-              : 'bg-[var(--bg-card)] text-text-muted border-[var(--border-color)] hover:text-[var(--text-primary)] hover:border-[#7c6aff]/40'
+                ? 'bg-[#7c6aff] text-white border-[#7c6aff] shadow-md shadow-[#7c6aff]/25'
+                : 'bg-[var(--bg-card)] text-text-muted border-[var(--border-color)] hover:text-[var(--text-primary)] hover:border-[#7c6aff]/40'
               }`}>
             {tab === 'group' ? t('dashboard_expense_by_group') : t('dashboard_monthly_trend')}
           </button>
@@ -383,59 +473,66 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
                           {(groupGroupFilter === '__all__' ? groupEntries : groupEntries.filter(([g]) => g === groupGroupFilter)).map(([g, gd]: [string, GroupData], i) => {
                             const isIncomeGroup = g.toLowerCase() === 'income';
                             const displayVal = isIncomeGroup ? gd.income : gd.expense;
-                            const totalValForPct = isIncomeGroup ? totalIncome : totalExpense;
-                            const pct = totalValForPct > 0 ? Math.round((displayVal / totalValForPct) * 100) : 0;
 
                             const budget = budgets.find(b => b.group_name === g);
-                            const budgetPct = budget && budget.amount > 0 ? Math.min(Math.round((gd.expense / budget.amount) * 100), 100) : (budget && budget.amount === 0 && gd.expense > 0 ? 100 : 0);
-                            const over = budget ? gd.expense > budget.amount : false;
-                            const remaining = budget ? budget.amount - gd.expense : null;
-                            const budgetBarColor = over ? '#f87171' : (budgetPct && budgetPct > 75) ? '#fbbf24' : '#34d399';
+                            const hasBudget = !!budget && budget.amount > 0;
+                            const budgetPct = hasBudget ? Math.min(Math.round((gd.expense / budget!.amount) * 100), 100) : 0;
+                            const over = hasBudget ? gd.expense > budget!.amount : false;
+                            const barColor = over ? '#f87171' : budgetPct >= 75 ? '#fbbf24' : '#34d399';
+
+                            // For income group — use green bar showing income vs total income
+                            const totalValForPct = isIncomeGroup ? totalIncome : totalExpense;
+                            const simplePct = totalValForPct > 0 ? Math.min(Math.round((displayVal / totalValForPct) * 100), 100) : 0;
+
                             return (
                               <div key={g} className="relative group">
-                                <button onClick={() => { if (!isSorting) { setSelectedGroup(g); setLevel('group'); } }}
-                                  className={`w-full text-left p-3 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] border transition-all flex flex-col ${isSorting ? 'border-[#7c6aff]/40 cursor-default' : 'border-transparent hover:border-[var(--border-color)]'}`}>
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => { if (!isSorting) { setSelectedGroup(g); setLevel('group'); } }}
+                                  className={`w-full text-left px-3 py-3 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] border transition-all flex flex-col gap-2 ${isSorting ? 'border-[#7c6aff]/40 cursor-default' : 'border-transparent hover:border-[var(--border-color)]'}`}
+                                >
+                                  {/* Row: sort arrows + name + amount + chevron */}
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
                                       {isSorting && (
-                                        <div className="flex flex-col gap-0.5 mr-1">
+                                        <div className="flex flex-col gap-0.5">
                                           <button onClick={(e) => { e.stopPropagation(); moveGroup(i, 'up'); }} className="p-0.5 hover:text-[#7c6aff]"><ArrowUp size={12} /></button>
                                           <button onClick={(e) => { e.stopPropagation(); moveGroup(i, 'down'); }} className="p-0.5 hover:text-[#7c6aff]"><ArrowDown size={12} /></button>
                                         </div>
                                       )}
-                                      <span className="text-sub font-bold text-[var(--text-primary)]">{g}</span>
+                                      <span className="text-body font-bold text-[var(--text-primary)] truncate">{g}</span>
+                                      {over && <span className="text-tiny font-bold text-[#f87171] shrink-0">⚠ Over</span>}
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                      <span className={`text-sub font-black ${isIncomeGroup ? 'text-[#34d399]' : ''}`}
-                                        style={!isIncomeGroup ? { color: COLORS[i % COLORS.length] } : undefined}>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span
+                                        className="text-body font-black"
+                                        style={{ color: isIncomeGroup ? '#34d399' : hasBudget ? barColor : COLORS[i % COLORS.length] }}
+                                      >
                                         {fullFmt(displayVal)}
                                       </span>
-                                      <span className="text-tiny text-text-muted bg-[var(--bg-card)] px-1.5 py-0.5 rounded-full">{pct}%</span>
                                       {!isSorting && <ChevronRight size={13} className="text-text-muted group-hover:translate-x-0.5 transition-transform" />}
                                     </div>
                                   </div>
+
+                                  {/* Single budget bar */}
                                   <div className="h-1.5 bg-[var(--bg-card)] rounded-full overflow-hidden">
-                                    <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5, delay: i * 0.05 }}
-                                      className="h-full rounded-full" style={{ backgroundColor: isIncomeGroup ? '#34d399' : COLORS[i % COLORS.length] }} />
+                                    {hasBudget ? (
+                                      <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${budgetPct}%` }}
+                                        transition={{ duration: 0.5, delay: i * 0.05 }}
+                                        className="h-full rounded-full"
+                                        style={{ backgroundColor: barColor }}
+                                      />
+                                    ) : (
+                                      <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${simplePct}%` }}
+                                        transition={{ duration: 0.5, delay: i * 0.05 }}
+                                        className="h-full rounded-full"
+                                        style={{ backgroundColor: isIncomeGroup ? '#34d399' : COLORS[i % COLORS.length] }}
+                                      />
+                                    )}
                                   </div>
-                                  {budget && (
-                                    <div className="mt-2 pt-2 border-t border-[var(--border-color)]">
-                                      <div className="h-1.5 bg-[var(--bg-card)] rounded-full overflow-hidden mb-1.5">
-                                        <motion.div initial={{ width: 0 }} animate={{ width: `${budgetPct}%` }} transition={{ duration: 0.5, delay: i * 0.05 + 0.1 }}
-                                          className="h-full rounded-full" style={{ backgroundColor: budgetBarColor }} />
-                                      </div>
-                                      <div className="flex flex-wrap items-center justify-between gap-y-0.5">
-                                        {over
-                                          ? <span className="text-tiny font-bold text-[#f87171]">⚠ {t('dashboard_over_by')} {fullFmt(gd.expense - budget.amount)}</span>
-                                          : <span className="text-tiny text-text-muted">{budgetPct}% {t('dashboard_of_budget')}</span>}
-                                        <span className="text-tiny text-text-muted break-all">
-                                          {fullFmt(gd.expense)} / {fullFmt(budget.amount)}
-                                          {!over && remaining !== null && <span className="font-bold ml-1" style={{ color: budgetBarColor }}>({fullFmt(remaining)} {t('dashboard_left')})</span>}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  )}
-                                  {!budget && !isIncomeGroup && <p className="text-tiny text-text-muted mt-1.5">{t('dashboard_no_budget_set')}</p>}
                                 </button>
                               </div>
                             );
@@ -616,11 +713,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ session, storageMode, budg
                     <ResponsiveContainer width="100%" height={180}>
                       <BarChart data={chartData} barGap={2}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
-                        <XAxis dataKey="label" tick={{ fontSize: 8, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 8, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} tickFormatter={v => fmt(v)} width={36} />
+                        <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} tickFormatter={v => fmt(v)} width={36} />
                         <Tooltip
                           formatter={(v: any, name: any) => [(v as number).toLocaleString(), name]}
-                          contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 10 }}
+                          contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 8, fontSize: 11 }}
                         />
                         <Bar dataKey="income" fill="#34d399" radius={[3, 3, 0, 0]} />
                         <Bar dataKey="expense" fill="#f87171" radius={[3, 3, 0, 0]} />
